@@ -9,7 +9,7 @@ built on [SPF-Framework](https://github.com/TrackAndTruckDevs/SPF-Framework) and
 
 #
 
-[![Version](https://img.shields.io/badge/release-N/A-brightgreen)]()
+[![Version](https://img.shields.io/badge/release-1.0-brightgreen)](https://github.com/Marcinekk/PWE-Overlay/releases)
 [![License](https://img.shields.io/badge/License-Apache--2.0-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![ATS](https://img.shields.io/badge/Game-ATS-blue)]()
 [![ETS2](https://img.shields.io/badge/Game-ETS2-blue)]()
