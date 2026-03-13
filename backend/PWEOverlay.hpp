@@ -14,6 +14,12 @@
 //
 namespace PWE {
     struct PluginContext {
+        PluginContext() {
+            supportedFrameworkVersion = "1.1.5";
+            supportedATSVersion = "1.58.1.4";
+            supportedETS2Version = "1.58.1.4";
+        }
+
         const SPF_Load_API* loadAPI = nullptr;
         const SPF_Core_API* coreAPI = nullptr;
 
@@ -25,8 +31,21 @@ namespace PWE {
 
         const SPF_Formatting_API* formattingAPI = nullptr;
         const SPF_UI_API* uiAPI = nullptr;
+        const SPF_Environment_API* environmentAPI = nullptr;
 
         HWND gameWindow = nullptr;
+
+        char frameworkVersion[64] = { 0 };
+        char gameVersion[64] = { 0 };
+        char gameName[128] = { 0 };
+
+        const char* supportedFrameworkVersion;
+        const char* supportedATSVersion;
+        const char* supportedETS2Version;
+
+        bool mismatchFrameworkVersion = false;
+        bool mismatchGameVersion = false;
+        bool isMultiplayer = false;
 
         bool showWindow = true;
         bool showWebView = false;

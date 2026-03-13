@@ -36,8 +36,29 @@ namespace PWE {
 
         g_ctx.loggerHandle = g_ctx.loadAPI->logger->Log_GetContext(PLUGIN_NAME);
         g_ctx.formattingAPI = g_ctx.loadAPI->formatting;
-        if (g_ctx.loadAPI->config) {
-            g_ctx.configHandle = g_ctx.loadAPI->config->Cfg_GetContext(PLUGIN_NAME);
+
+        if (g_ctx.loadAPI->config) g_ctx.configHandle = g_ctx.loadAPI->config->Cfg_GetContext(PLUGIN_NAME);
+        
+        g_ctx.environmentAPI = g_ctx.loadAPI->environment;
+        if (g_ctx.environmentAPI) g_ctx.environmentHandle = g_ctx.environmentAPI->Env_GetContext(PLUGIN_NAME);
+
+        if (g_ctx.environmentHandle) {
+            g_ctx.environmentAPI->Env_GetFrameworkVersion(g_ctx.environmentHandle, g_ctx.frameworkVersion, sizeof(g_ctx.frameworkVersion));
+            g_ctx.environmentAPI->Env_GetGameVersion(g_ctx.environmentHandle, g_ctx.gameVersion, sizeof(g_ctx.gameVersion));
+            g_ctx.environmentAPI->Env_GetGameName(g_ctx.environmentHandle, g_ctx.gameName, sizeof(g_ctx.gameName));
+
+            if (strcmp(g_ctx.frameworkVersion, g_ctx.supportedFrameworkVersion) != 0) {
+                g_ctx.loadAPI->logger->Log(g_ctx.loggerHandle, SPF_LOG_WARN, "PWEOverlay: framework version mismatch.");
+                g_ctx.mismatchFrameworkVersion = true;
+            }
+            if (strcmp(g_ctx.gameVersion, g_ctx.supportedATSVersion) != 0 && strcmp(g_ctx.gameName, "American Truck Simulator") == 0) {
+                g_ctx.loadAPI->logger->Log(g_ctx.loggerHandle, SPF_LOG_WARN, "PWEOverlay: ATS version mismatch.");
+                g_ctx.mismatchGameVersion = true;
+            }
+            if (strcmp(g_ctx.gameVersion, g_ctx.supportedETS2Version) != 0 && strcmp(g_ctx.gameName, "Euro Truck Simulator 2") == 0) {
+                g_ctx.loadAPI->logger->Log(g_ctx.loggerHandle, SPF_LOG_WARN, "PWEOverlay: ETS2 version mismatch.");
+                g_ctx.mismatchGameVersion = true;
+            }
         }
 
         g27LED.Init();
@@ -47,7 +68,7 @@ namespace PWE {
                 g_ctx.loadAPI->logger->Log(g_ctx.loggerHandle, SPF_LOG_WARN, "PWEOverlay: WebView2 headers not found at build time; overlay disabled.");
             }
         }
-        //
+
         PWE::SetWebViewOverlayMessageCallback(&Internal::HandleWebViewMessageJson);
     }
 
@@ -57,7 +78,8 @@ namespace PWE {
 
         Hooks::RegisterAllHooks();
 
-        if (g_ctx.coreAPI->environment) g_ctx.environmentHandle = g_ctx.coreAPI->environment->Env_GetContext(PLUGIN_NAME);
+        if (!g_ctx.environmentAPI) g_ctx.environmentAPI = g_ctx.coreAPI->environment;
+        if (!g_ctx.environmentHandle && g_ctx.environmentAPI) g_ctx.environmentHandle = g_ctx.environmentAPI->Env_GetContext(PLUGIN_NAME);
         if (g_ctx.coreAPI->telemetry) g_ctx.telemetryHandle = g_ctx.coreAPI->telemetry->Tel_GetContext(PLUGIN_NAME);
         if (g_ctx.coreAPI->keybinds) {
             g_ctx.keybindsHandle = g_ctx.coreAPI->keybinds->Kbind_GetContext(PLUGIN_NAME);
@@ -76,7 +98,7 @@ namespace PWE {
     void OnUpdate() {
         Internal::ProcessHotkeys();
         Internal::UpdateG27LEDs();
-        //
+
         if (!PWE::IsWebViewOverlayAvailable()) {
             if (!g_ctx.webViewUnavailableLogged && g_ctx.showWebView && g_ctx.loggerHandle && g_ctx.loadAPI) {
                 g_ctx.loadAPI->logger->Log(g_ctx.loggerHandle, SPF_LOG_WARN,
@@ -85,12 +107,12 @@ namespace PWE {
             }
             return;
         }
-        //
+
         HWND hostWindow = Internal::ResolveGameWindow();
         if (hostWindow) {
             const bool ready = PWE::InitializeWebViewOverlay(hostWindow);
             if (ready && !g_ctx.webViewInitLogged && g_ctx.loggerHandle && g_ctx.loadAPI) g_ctx.webViewInitLogged = true;
-            //
+
             PWE::SetWebViewOverlayVisible(g_ctx.showWebView);
             Internal::ApplyFocusState();
             PWE::UpdateWebViewOverlayBounds();

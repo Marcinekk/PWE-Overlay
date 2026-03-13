@@ -1,19 +1,21 @@
 <script setup lang="ts">
-    import { computed, ref } from 'vue';
+    import { computed, ref, onMounted } from 'vue';
     import { useRouter } from 'vue-router';
     import { useTelemetryStore } from '@stores/telemetry';
     import { useLayoutStore } from '@stores/layout';
     import { useSettingsStore } from '@stores/settings';
     import { usePluginBridgeStore } from '@stores/pluginBridge';
+    import { useMiscStore } from '@stores/misc';
     import { Locale } from '@composables/useLanguage';
 
-    import { faArrowLeft, faLayerGroup, faPenToSquare, faGear } from '@fortawesome/free-solid-svg-icons';
+    import { faArrowLeft, faLayerGroup, faPenToSquare, faGear, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 
     const router = useRouter();
     const telemetry = useTelemetryStore();
     const layout = useLayoutStore();
     const settings = useSettingsStore();
     const bridge = usePluginBridgeStore();
+    const miscStore = useMiscStore();
     const moneyDelta = ref(1000);
     const secretClicks = ref(0);
     const showMoneyTools = ref(false);
@@ -57,6 +59,11 @@
         sanitizeMoneyDelta();
         bridge.sendCommand('economy/remove_money', { amount: moneyDelta.value });
     }
+
+    onMounted(() => {
+        bridge.sendCommand('internal/get_versions', {});
+        bridge.sendCommand('internal/get_multiplayer', {});
+    });
 </script>
 
 <template>
@@ -82,7 +89,7 @@
                         <span>{{ Locale('pauseMenu.quickStatus') }}</span>
                     </div>
                     <div class="pause-card__rows">
-                        <div><span>{{ Locale('settings.sdk.connected') }}</span><strong>{{ telemetry.connected ? Locale('settings.sdk.connected') : Locale('settings.sdk.disconnected') }}</strong></div>
+                        <div><span>{{ Locale('settings.sdk.status') }}</span><strong>{{ telemetry.connected ? Locale('settings.sdk.connected') : Locale('settings.sdk.disconnected') }}</strong></div>
                         <div><span>{{ Locale('settings.layout.editMode') }}</span><strong>{{ layout.editMode ? Locale('settings.layout.on') : Locale('settings.layout.off') }}</strong></div>
                         <div><span>{{ Locale('settings.view.speedUnit') }}</span><strong>{{ speedUnitLabel }}</strong></div>
                         <div><span>{{ Locale('pauseMenu.speed') }}</span><strong>{{ Math.round(telemetry.data.speed) }} {{ speedUnitLabel }}</strong></div>
@@ -101,7 +108,7 @@
                     </div>
                 </section>
                 <!--  -->
-                <section class="pause-card" v-if="showMoneyTools">
+                <section class="pause-card" v-if="showMoneyTools" :class="{ 'pause-card--disabled': miscStore.miscSettings.isMultiplayer }">
                     <div class="pause-card__head">
                         <FontAwesomeIcon :icon="faGear" />
                         <span>{{ Locale('pauseMenu.cheat') }}</span>
@@ -113,12 +120,34 @@
                             min="1"
                             step="100"
                             class="pause-card__input"
+                            :disabled="miscStore.miscSettings.isMultiplayer"
                         >
-                        <button :disabled="!bridge.available" @click="addMoney">{{ Locale('pauseMenu.addMoney') }}</button>
-                        <button :disabled="!bridge.available" @click="removeMoney">{{ Locale('pauseMenu.removeMoney') }}</button>
+                        <button :disabled="!bridge.available || miscStore.miscSettings.isMultiplayer" @click="addMoney">{{ Locale('pauseMenu.addMoney') }}</button>
+                        <button :disabled="!bridge.available || miscStore.miscSettings.isMultiplayer" @click="removeMoney">{{ Locale('pauseMenu.removeMoney') }}</button>
                     </div>
                     <p class="pause-card__text" v-if="bridge.lastError">{{ Locale('pauseMenu.error') }}: {{ bridge.lastError }}</p>
+                    <p class="pause-card__text text-orange-400 mt-2 font-bold" v-if="miscStore.miscSettings.isMultiplayer">{{ Locale('pauseMenu.multiplayerDisabled') }}</p>
                 </section>
+            </div>
+
+            <div v-if="miscStore.miscSettings.gameMismatch || miscStore.miscSettings.frameworkMismatch" class="mt-8 space-y-3">
+                <div v-if="miscStore.miscSettings.gameMismatch" class="pause-alert pause-alert--error">
+                    <div class="pause-alert__icon">
+                        <FontAwesomeIcon :icon="faTriangleExclamation" />
+                    </div>
+                    <div class="pause-alert__content">
+                        {{ Locale('pauseMenu.warnings.gameMismatch') }}
+                    </div>
+                </div>
+
+                <div v-if="miscStore.miscSettings.frameworkMismatch" class="pause-alert pause-alert--warning">
+                    <div class="pause-alert__icon">
+                        <FontAwesomeIcon :icon="faTriangleExclamation" />
+                    </div>
+                    <div class="pause-alert__content">
+                        {{ Locale('pauseMenu.warnings.frameworkMismatch') }}
+                    </div>
+                </div>
             </div>
         </div>
         <div class="pause-page__money-corner">{{ moneyLabel }}</div>
@@ -245,6 +274,15 @@
         padding: 14px;
     }
 
+    .pause-card--disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .pause-card--disabled * {
+        pointer-events: none;
+    }
+
     .pause-card__head {
         display: inline-flex;
         align-items: center;
@@ -314,6 +352,37 @@
         color: #8f9db1;
         font-size: 13px;
         line-height: 1.5;
+    }
+
+    .pause-alert {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        backdrop-filter: blur(10px);
+    }
+
+    .pause-alert--warning {
+        background: rgba(234, 179, 8, 0.1);
+        border: 1px solid rgba(234, 179, 8, 0.3);
+        color: #fde047;
+    }
+
+    .pause-alert--error {
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.35);
+        color: #fca5a5;
+    }
+
+    .pause-alert__icon {
+        flex-shrink: 0;
+        font-size: 16px;
+    }
+
+    .pause-alert__content {
+        line-height: 1.4;
     }
 
     @media (min-width: 900px) {

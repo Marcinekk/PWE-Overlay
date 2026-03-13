@@ -54,7 +54,12 @@
         "addMoney": "Dodaj pieniądze",
         "removeMoney": "Usuń pieniądze",
         "error": "Błąd",
-        "actions": "Akcje"
+        "actions": "Akcje",
+        "multiplayerDisabled": "Niedostępne w trybie multiplayer",
+        "warnings": {
+            "gameMismatch": "Wykryto niezgodność wersji gry! Niektóre funkcje mogą nie działać poprawnie.",
+            "frameworkMismatch": "Wykryto niezgodność frameworka! Zaleca się aktualizację pluginu."
+        }
     },
     "widgets": {
         "alerts": {
