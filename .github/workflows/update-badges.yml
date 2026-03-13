@@ -7,11 +7,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-badges:
+  generate-badges:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -21,21 +20,22 @@ jobs:
       - name: Install badge-maker
         run: npm install badge-maker
 
-      - name: Create assets/badges folder
-        run: mkdir -p assets/badges
-
-      - name: Read versions and generate SVG badges
+      - name: Read versions
+        id: versions
         run: |
           ATS_VER=$(grep 'ats:' versions.yml | awk -F'"' '{print $2}')
           ETS2_VER=$(grep 'ets2:' versions.yml | awk -F'"' '{print $2}')
-          
-          node -e "const { makeBadge } = require('badge-maker'); const fs=require('fs'); fs.writeFileSync('assets/badges/ATS.svg', makeBadge({label:'ATS', message:'$ATS_VER', color:'blue'}))"
-          node -e "const { makeBadge } = require('badge-maker'); const fs=require('fs'); fs.writeFileSync('assets/badges/ETS2.svg', makeBadge({label:'ETS2', message:'$ETS2_VER', color:'blue'}))"
+          echo "ATS_VER=$ATS_VER" >> $GITHUB_ENV
+          echo "ETS2_VER=$ETS2_VER" >> $GITHUB_ENV
 
-      - name: Commit updated badges
+      - name: Generate badges
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add assets/badges/*.svg
-          git diff --quiet || git commit -m "Update game version badges [skip ci]"
-          git push
+          mkdir -p badges
+          node -e "const { makeBadge } = require('badge-maker'); const fs=require('fs'); fs.writeFileSync('badges/ATS.svg', makeBadge({label:'ATS', message:'$ATS_VER', color:'blue'}))"
+          node -e "const { makeBadge } = require('badge-maker'); const fs=require('fs'); fs.writeFileSync('badges/ETS2.svg', makeBadge({label:'ETS2', message:'$ETS2_VER', color:'blue'}))"
+
+      - name: Upload badges as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: game-badges
+          path: badges/
