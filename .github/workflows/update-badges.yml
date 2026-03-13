@@ -35,7 +35,7 @@ jobs:
           node -e "const { makeBadge } = require('badge-maker'); const fs=require('fs'); fs.writeFileSync('badges/ETS2.svg', makeBadge({label:'ETS2', message:'$ETS2_VER', color:'blue'}))"
 
       - name: Upload badges as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: game-badges
           path: badges/
