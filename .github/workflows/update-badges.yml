@@ -1,26 +1,38 @@
-name: Update Game Badges
+name: Generate Game Version Badges
 
 on:
   push:
+    branches: [ main ]
     paths:
-      - 'versions.json'
+      - 'versions.yml'
   workflow_dispatch:
 
 jobs:
-  badges:
+  update-badges:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: 20
 
       - name: Install dependencies
-        run: npm install node-fetch@3.3.2
+        run: npm install -g badge-maker yaml
 
-      - name: Generate badges
+      - name: Generate SVG badges
         run: |
-          node .github/scripts/generate-badges.js
+          mkdir -p assets/badges
+          ATS_VER=$(node -e "console.log(require('fs').readFileSync('versions.yml','utf8').match(/ats: \"(.*)\"/)[1])")
+          ETS2_VER=$(node -e "console.log(require('fs').readFileSync('versions.yml','utf8').match(/ets2: \"(.*)\"/)[1])")
+          npx badge-maker "assets/badges/ATS.svg" "ATS" "$ATS_VER" "blue"
+          npx badge-maker "assets/badges/ETS2.svg" "ETS2" "$ETS2_VER" "blue"
+
+      - name: Commit badges
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add assets/badges/*.svg
+          git diff --quiet || git commit -m "Update game version badges [skip ci]"
+          git push
