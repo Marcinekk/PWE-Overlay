@@ -5,6 +5,7 @@
     import { useLayoutStore } from '@stores/layout';
     import { useSettingsStore } from '@stores/settings';
     import { usePluginBridgeStore } from '@stores/pluginBridge';
+    import { Locale } from '@composables/useLanguage';
 
     import { faArrowLeft, faLayerGroup, faPenToSquare, faGear } from '@fortawesome/free-solid-svg-icons';
 
@@ -66,7 +67,7 @@
                 <div class="pause-page__state">{{ pauseLabel }}</div>
                 <button class="pause-page__back" @click="goBack">
                     <FontAwesomeIcon :icon="faArrowLeft" />
-                    <span>Powrót</span>
+                    <span>{{ Locale('pauseMenu.back') }}</span>
                 </button>
             </div>
             <!--  -->
@@ -78,24 +79,24 @@
                 <section class="pause-card">
                     <div class="pause-card__head">
                         <FontAwesomeIcon :icon="faLayerGroup" />
-                        <span>Szybki status</span>
+                        <span>{{ Locale('pauseMenu.quickStatus') }}</span>
                     </div>
                     <div class="pause-card__rows">
-                        <div><span>Połączenie</span><strong>{{ telemetry.connected ? 'online' : 'offline' }}</strong></div>
-                        <div><span>Tryb edycji</span><strong>{{ layout.editMode ? 'włączony' : 'wyłączony' }}</strong></div>
-                        <div><span>Jednostka prędkości</span><strong>{{ speedUnitLabel }}</strong></div>
-                        <div><span>Prędkość</span><strong>{{ Math.round(telemetry.data.speed) }} {{ speedUnitLabel }}</strong></div>
+                        <div><span>{{ Locale('settings.sdk.connected') }}</span><strong>{{ telemetry.connected ? Locale('settings.sdk.connected') : Locale('settings.sdk.disconnected') }}</strong></div>
+                        <div><span>{{ Locale('settings.layout.editMode') }}</span><strong>{{ layout.editMode ? Locale('settings.layout.on') : Locale('settings.layout.off') }}</strong></div>
+                        <div><span>{{ Locale('settings.view.speedUnit') }}</span><strong>{{ speedUnitLabel }}</strong></div>
+                        <div><span>{{ Locale('pauseMenu.speed') }}</span><strong>{{ Math.round(telemetry.data.speed) }} {{ speedUnitLabel }}</strong></div>
                     </div>
                 </section>
                 <!--  -->
                 <section class="pause-card">
                     <div class="pause-card__head">
                         <FontAwesomeIcon :icon="faPenToSquare" />
-                        <span>Akcje</span>
+                        <span>{{ Locale('pauseMenu.actions') }}</span>
                     </div>
                     <div class="pause-card__actions">
                         <button @click="toggleEditMode">
-                            {{ layout.editMode ? 'Wyłącz tryb edycji' : 'Włącz tryb edycji' }}
+                            {{ layout.editMode ? Locale('pauseMenu.finishEdit') : Locale('pauseMenu.editLayout') }}
                         </button>
                     </div>
                 </section>
@@ -103,7 +104,7 @@
                 <section class="pause-card" v-if="showMoneyTools">
                     <div class="pause-card__head">
                         <FontAwesomeIcon :icon="faGear" />
-                        <span>Cheat</span>
+                        <span>{{ Locale('pauseMenu.cheat') }}</span>
                     </div>
                     <div class="pause-card__actions">
                         <input
@@ -113,10 +114,10 @@
                             step="100"
                             class="pause-card__input"
                         >
-                        <button :disabled="!bridge.available" @click="addMoney">+ kasa</button>
-                        <button :disabled="!bridge.available" @click="removeMoney">- kasa</button>
+                        <button :disabled="!bridge.available" @click="addMoney">{{ Locale('pauseMenu.addMoney') }}</button>
+                        <button :disabled="!bridge.available" @click="removeMoney">{{ Locale('pauseMenu.removeMoney') }}</button>
                     </div>
-                    <p class="pause-card__text" v-if="bridge.lastError">Błąd: {{ bridge.lastError }}</p>
+                    <p class="pause-card__text" v-if="bridge.lastError">{{ Locale('pauseMenu.error') }}: {{ bridge.lastError }}</p>
                 </section>
             </div>
         </div>

@@ -19,19 +19,11 @@ built on [SPF-Framework](https://github.com/TrackAndTruckDevs/SPF-Framework) and
 [![ATS](https://img.shields.io/badge/ATS-1.58.1.4-blue)]()
 [![ETS2](https://img.shields.io/badge/ETS2-N/A-red)]()
 
-## Acknowledgements
+## Known Issues
 
-- [@TrackAndTruckDevs](https://github.com/TrackAndTruckDevs) for creating whole Framework
-- [VueJs](https://vuejs.org/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [FontAwesome](https://fontawesome.com/icons)
-- [TailwindCSS](https://tailwindcss.com)
-- [Flowbite](https://flowbite.com/)
-- [WebView2](https://learn.microsoft.com/en-us/microsoft-edge/webview2/)
+[![Known Issues](https://img.shields.io/github/issues/Marcinekk/PWE-Overlay/bug)](https://github.com/Marcinekk/PWE-Overlay/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
 
-## License
-
-This project is licensed under the Apache License 2.0 – see [LICENSE](https://github.com/Marcinekk/PWE-Overlay/blob/main/LICENSE) for details.
+See the list of currently known problems before opening a new issue.
 
 ## Contributing
 
@@ -49,3 +41,17 @@ If you encounter a bug, please open an issue on GitHub using the bug report temp
 - OS version
 - Steps to reproduce
 - Screenshots if applicable
+
+## License
+
+This project is licensed under the Apache License 2.0 – see [LICENSE](https://github.com/Marcinekk/PWE-Overlay/blob/main/LICENSE) for details.
+
+## Acknowledgements
+
+- [@TrackAndTruckDevs](https://github.com/TrackAndTruckDevs) for creating whole Framework
+- [VueJs](https://vuejs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [FontAwesome](https://fontawesome.com/icons)
+- [TailwindCSS](https://tailwindcss.com)
+- [Flowbite](https://flowbite.com/)
+- [WebView2](https://learn.microsoft.com/en-us/microsoft-edge/webview2/)

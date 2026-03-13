@@ -2,6 +2,7 @@
     import { computed } from 'vue';
     import { useTelemetryStore } from '@stores/telemetry';
     import { useSettingsStore } from '@stores/settings';
+    import { Locale } from '@composables/useLanguage';
 
     const telemetry = useTelemetryStore();
     const settings = useSettingsStore();
@@ -149,7 +150,7 @@
 
             <g v-if="telemetry.data.cruiseControl">
                 <circle cx="45" cy="155" r="14" fill="#083426" stroke="#6ce0a0" stroke-width="1" />
-                <text x="45" y="155" fill="#6ce0a0" font-size="9" text-anchor="middle" dominant-baseline="middle">CC</text>
+                <text x="45" y="155" fill="#6ce0a0" font-size="9" text-anchor="middle" dominant-baseline="middle">{{ Locale('widgets.speedometer.cruise') }}</text>
             </g>
         </svg>
     </div>
