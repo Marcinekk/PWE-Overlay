@@ -40,7 +40,7 @@ echo.
 echo ==============================================
 echo Building Backend
 echo ==============================================
-cd /d "%~dp0backend"
+cd /d "%~dp0../backend"
 
 echo.
 echo Using CMake: "%CMAKE_EXE%"
@@ -72,5 +72,5 @@ if %ERRORLEVEL% neq 0 (
 
 echo.
 echo Backend built successfully!
-echo Output is located in: %~dp0backend\build\Release\
+echo Output is located in: %~dp0scripts\Release\
 pause
