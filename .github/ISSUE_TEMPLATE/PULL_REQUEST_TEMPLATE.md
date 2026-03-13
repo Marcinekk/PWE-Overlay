@@ -15,6 +15,6 @@ Describe how you tested the changes.
 
 ## Checklist
 
-- Code compiles
-- No unnecessary files added
-- Documentation updated if needed
+- [ ] Code compiles
+- [ ] Build outputs not committed
+- [ ] Documentation updated
