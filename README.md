@@ -17,8 +17,13 @@ built on [SPF-Framework](https://github.com/TrackAndTruckDevs/SPF-Framework) and
 [![Support me on Ko-fi](https://img.shields.io/badge/Support-Ko--fi-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/pwe_scripts)
 
 ## Supported Games
+
 [![ATS](https://img.shields.io/badge/ATS-1.58.1.4-blue)]()
 [![ETS2](https://img.shields.io/badge/ETS2-N/A-red)]()
+
+## Video
+
+[![PWE Overlay](https://img.youtube.com/vi/nKwqXW3Y9QQ/0.jpg)](https://www.youtube.com/watch?v=nKwqXW3Y9QQ)
 
 ## Known Issues
 
