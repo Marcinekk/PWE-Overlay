@@ -2,6 +2,7 @@
     import { computed } from 'vue';
     import { useTelemetryStore } from '@stores/telemetry';
     import { useSettingsStore } from '@stores/settings';
+    import { Locale } from '@composables/useLanguage';
 
     const telemetry = useTelemetryStore();
     const settings = useSettingsStore();
@@ -23,14 +24,14 @@
         <div class="flex items-center justify-between">
             <div class="text-center">
                 <div class="text-base font-black font-mono text-slate-100 leading-none">{{ telemetry.navDistanceFormatted }}</div>
-                <div class="text-xs text-slate-400 font-mono">do celu</div>
+                <div class="text-xs text-slate-400 font-mono">{{ Locale('widgets.navigation.to_destination') }}</div>
             </div>
 
             <div class="h-10 w-px bg-slate-600/60" />
 
             <div class="text-center">
                 <div class="text-base font-black font-mono text-slate-100 leading-none">{{ telemetry.navTimeFormatted }}</div>
-                <div class="text-xs text-slate-400 font-mono">ETA</div>
+                <div class="text-xs text-slate-400 font-mono">{{ Locale('widgets.navigation.eta') }}</div>
             </div>
 
             <div class="h-10 w-px bg-slate-600/60" />

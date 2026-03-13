@@ -2,6 +2,7 @@
     import { computed, ref, onMounted, onUnmounted } from "vue";
     import { useTelemetryStore } from "@stores/telemetry";
     import { faWind, faTriangleExclamation, faGasPump, faDroplet, faOilCan, faTemperatureHigh, faBatteryQuarter } from "@fortawesome/free-solid-svg-icons";
+    import { Locale } from "@composables/useLanguage";
 
     const telemetry = useTelemetryStore();
     const blink = ref(true);
@@ -19,49 +20,49 @@
             {
                 key: "airEmergency",
                 icon: faTriangleExclamation,
-                label: "AIR!",
+                label: Locale('widgets.warnings.airEmergency'),
                 active: t.airPressureEmergency,
                 level: "critical",
             },
             {
                 key: "airWarning",
                 icon: faWind,
-                label: "AIR",
+                label: Locale('widgets.warnings.airWarning'),
                 active: t.airPressureWarning && !t.airPressureEmergency,
                 level: "warning",
             },
             {
                 key: "fuel",
                 icon: faGasPump,
-                label: "FUEL",
+                label: Locale('widgets.warnings.fuel'),
                 active: t.fuelWarning,
                 level: "warning",
             },
             {
                 key: "adblue",
                 icon: faDroplet,
-                label: "ADBlue",
+                label: Locale('widgets.warnings.adblue'),
                 active: t.adblueWarning,
                 level: "warning",
             },
             {
                 key: "oil",
                 icon: faOilCan,
-                label: "OIL",
+                label: Locale('widgets.warnings.oil'),
                 active: t.oilPressureWarning,
                 level: "critical",
             },
             {
                 key: "water",
                 icon: faTemperatureHigh,
-                label: "TEMP",
+                label: Locale('widgets.warnings.water'),
                 active: t.waterTemperatureWarning,
                 level: "critical",
             },
             {
                 key: "battery",
                 icon: faBatteryQuarter,
-                label: "BAT",
+                label: Locale('widgets.warnings.battery'),
                 active: t.batteryVoltageWarning,
                 level: "warning",
             },

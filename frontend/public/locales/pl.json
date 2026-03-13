@@ -1,0 +1,170 @@
+{
+    "app": {
+        "title": "PWE",
+        "loading": "Ładowanie…"
+    },
+    "settings": {
+        "title": "Ustawienia",
+        "save": "Zapisz ustawienia",
+        "sdk": {
+            "title": "SDK",
+            "status": "Status",
+            "connected": "Połączony",
+            "disconnected": "Rozłączony",
+            "stopDemo": "Stop Demo",
+            "demoMode": "Demo Mode"
+        },
+        "view": {
+            "title": "Widok",
+            "speedUnit": "Jednostka prędkości",
+            "globalOpacity": "Globalna przezroczystość"
+        },
+        "language": {
+            "title": "Język",
+            "selector": "Wybór języka",
+            "english": "English",
+            "polish": "Polski"
+        },
+        "widgets": {
+            "title": "Widgety",
+            "restoreHidden": "Przywróć ukryte ({count})",
+            "locked": "Zablokowany",
+            "unlocked": "Odblokowany",
+            "hide": "Ukryj",
+            "restore": "Przywróć",
+            "resize": "Zmień rozmiar"
+        },
+        "layout": {
+            "title": "Układ",
+            "finishEdit": "Zakończ edycję",
+            "editLayout": "Edytuj układ",
+            "editMode": "Tryb edycji",
+            "resetConfirm": "Reset układu do domyślnego?",
+            "on": "włączony",
+            "off": "wyłączony"
+        }
+    },
+    "pauseMenu": {
+        "back": "Powrót",
+        "quickStatus": "Szybki status",
+        "speed": "Prędkość",
+        "finishEdit": "Zakończ edycję",
+        "editLayout": "Edytuj układ",
+        "cheat": "Cheat",
+        "addMoney": "Dodaj pieniądze",
+        "removeMoney": "Usuń pieniądze",
+        "error": "Błąd",
+        "actions": "Akcje"
+    },
+    "widgets": {
+        "alerts": {
+            "name": "Alerty",
+            "player_driver_income": "Zarobek",
+            "player_job_income": "Zarobek",
+            "player_truck_sold": "Sprzedaż pojazdu",
+            "player_loan_taken": "Pożyczka",
+            "player_truck_sold_exchange": "",
+            "player_fined": "Mandat",
+            "player_refuel": "Tankowanie",
+            "player_emergency_refuel": "Tankowanie awaryjne",
+            "player_service_fix": "Serwis",
+            "player_service_mod": "Serwis",
+            "player_service_renovation": "Serwis",
+            "player_service_teleport": "Transport",
+            "player_job_cancelled": "Kara",
+            "player_truck_bought": "Zakup pojazdu",
+            "player_truck_bought_used_online": "Zakup pojazdu",
+            "player_garage_teleport": "Transport",
+            "player_garage_upgrade": "Ulepszenie",
+            "player_garage_bought": "Nieruchomość",
+            "player_garage_bought_online": "Nieruchomość",
+            "player_quick_travel": "Transport",
+            "player_driver_hired": "Zatrudnienie",
+            "player_loan_paid": "Rata pożyczki",
+            "player_loan_paid_one": "Spłata pożyczki",
+            "player_tollgate_paid": "Płatna autostrada",
+            "bank": "Bank",
+            "xp": "Doświadczenie"
+        },
+        "fuel": {
+            "name": "Paliwo",
+            "range": "Zasięg",
+            "consumption": "Spalanie"
+        },
+        "gear": {
+            "name": "Bieg",
+            "park": "P",
+            "cruise": "T",
+            "motor_brake": "MB"
+        },
+        "job": {
+            "name": "Zlecenie",
+            "cargo": "Ładunek",
+            "distance": "Dystans",
+            "income": "Zarobek"
+        },
+        "lights": {
+            "name": "Swiatła",
+            "park": "Parking",
+            "low": "L",
+            "high": "H",
+            "beacon": "B",
+            "blinker_left": "L",
+            "blinker_right": "P"
+        },
+        "name": {
+            "name": "Name"
+        },
+        "navigation": {
+            "name": "Nawigacja",
+            "to_destination": "do celu",
+            "eta": "ETA"
+        },
+        "speedometer": {
+            "name": "Prędkościomierz",
+            "cruise": "Tempomat"
+        },
+        "tachograph": {
+            "name": "Tachograf",
+            "driving": "Jazda",
+            "work": "Praca",
+            "break": "Przerwa",
+            "rest": "Odp.",
+            "continuous": "Ciagła jazda",
+            "daily_driving": "Dzienna jazda",
+            "daily_work": "Dzienna praca",
+            "auto": "Auto"
+        },
+        "tachometer": {
+            "name": "Obrotomierz"
+        },
+        "time": {
+            "name": "Czas",
+            "game": "Czas gry",
+            "local": "Lokalny"
+        },
+        "truck-info": {
+            "name": "Info o ciężarówce",
+            "odometer": "Przebieg"
+        },
+        "warnings": {
+            "name": "Ostrzeżenia",
+            "airEmergency": "AIR!",
+            "airWarning": "AIR",
+            "fuel": "FUEL",
+            "adblue": "ADBlue",
+            "oil": "OIL",
+            "water": "TEMP",
+            "battery": "BAT"
+        },
+        "wear": {
+            "name": "Uszkodzenia",
+            "engine": "Silnik",
+            "transmission": "Skrzynia",
+            "cabin": "Kabina",
+            "chassis": "Podwozie",
+            "wheels": "Koła",
+            "trailer": "Naczepa"
+        }
+    }
+}

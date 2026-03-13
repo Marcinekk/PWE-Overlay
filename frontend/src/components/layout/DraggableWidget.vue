@@ -6,6 +6,7 @@
     import { useTelemetryStore } from '@stores/telemetry';
     import { useLayoutStore } from '@stores/layout';
     import type { WidgetId } from '@interfaces/widget';
+    import { Locale } from '@composables/useLanguage';
 
     import { faEyeSlash, faSun, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 
@@ -66,11 +67,11 @@
                 class="absolute -top-7 left-0 flex items-center gap-1 z-50 bg-slate-950/90 border border-slate-600/40 rounded-t px-2 py-0.5"
                 data-no-drag
             >
-                <span class="text-xs text-slate-300 font-mono mr-1">{{ widgetMeta?.label || widget.id }}</span>
+                <span class="text-xs text-slate-300 font-mono mr-1">{{ widgetMeta?.label ? Locale(widgetMeta.label) : widget.id }}</span>
 
                 <button
                     class="text-slate-400 hover:text-cyan-300 text-xs px-1 transition-colors"
-                    :title="widget.locked ? 'Odblokuj' : 'Zablokuj'"
+                    :title="widget.locked ? Locale('settings.widgets.locked') : Locale('settings.widgets.unlocked')"
                     @click="layout.toggleLocked(widget.id)"
                 >
                     <FontAwesomeIcon :icon="widget.locked ? faLock : faLockOpen" />
@@ -78,7 +79,7 @@
 
                 <button
                     class="text-slate-400 hover:text-red-400 text-xs px-1 transition-colors"
-                    title="Ukryj"
+                    :title="Locale('settings.widgets.hide')"
                     @click="layout.toggleVisible(widget.id)"
                 >
                     <FontAwesomeIcon :icon="faEyeSlash" />
@@ -110,7 +111,7 @@
             <button
                 v-if="editMode && !widget.locked"
                 class="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize bg-cyan-500/40 hover:bg-cyan-400/55 rounded-tl"
-                title="Zmień rozmiar"
+                :title="Locale('settings.widgets.resize')"
                 data-no-drag
                 @mousedown="onResizeMouseDown"
             />

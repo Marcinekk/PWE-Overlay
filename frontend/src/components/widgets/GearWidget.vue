@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import { computed } from 'vue';
     import { useTelemetryStore } from '@stores/telemetry';
+    import { Locale } from '@composables/useLanguage';
 
     const telemetry = useTelemetryStore();
 
@@ -41,21 +42,21 @@
                 class="text-xs font-bold px-1.5 py-0.5 rounded transition-all"
                 :class="telemetry.data.parkBrake ? 'bg-red-500/20 text-red-300 ring-1 ring-red-500' : 'bg-slate-800 text-slate-500'"
             >
-                P
+                {{ Locale('widgets.gear.park') }}
             </div>
 
             <div
                 class="text-xs font-bold px-1.5 py-0.5 rounded transition-all"
                 :class="telemetry.data.cruiseControl ? 'bg-yellow-500/20 text-yellow-300 ring-1 ring-yellow-500' : 'bg-slate-800 text-slate-500'"
             >
-                C
+                {{ Locale('widgets.gear.cruise') }}
             </div>
 
             <div
                 class="text-xs font-bold px-1.5 py-0.5 rounded transition-all"
                 :class="telemetry.data.motorBrake ? 'bg-yellow-500/20 text-yellow-300 ring-1 ring-yellow-500' : 'bg-slate-800 text-slate-500'"
             >
-                MB
+                {{ Locale('widgets.gear.motor_brake') }}
             </div>
         </div>
     </div>

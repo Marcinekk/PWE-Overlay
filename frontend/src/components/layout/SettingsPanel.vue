@@ -5,8 +5,10 @@
     import { useSettingsStore } from '@stores/settings';
     import { useSimulator } from '@composables/useSimulator';
     import { widgetDefinitions } from '@widgets/index';
+    import { i18n, setLocale } from '../../i18n';
+    import type { SupportedLocale } from '../../i18n';
 
-    import { faSliders, faXmark, faArrowsUpDownLeftRight, faRotateLeft, faFloppyDisk, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
+    import { faSliders, faXmark, faArrowsUpDownLeftRight, faRotateLeft, faFloppyDisk, faLock, faLockOpen, faStop, faPlay, faLanguage } from '@fortawesome/free-solid-svg-icons';
 
     defineProps<{ open: boolean }>();
     const emit = defineEmits<{ close: [] }>();
@@ -16,17 +18,25 @@
     const settingsStore = useSettingsStore();
     const simulator = useSimulator();
     const settingsLocal = reactive({ ...settingsStore.settings });
+    const activeLocale = computed(() => i18n.global.locale.value);
     const widgetsWithMeta = computed(() => {
-        return widgetDefinitions.map((definition) => {
-            const meta = definition.meta;
-            const config = layout.getWidget(meta.name);
-            return {
-                id: meta.name,
-                visible: config?.visible ?? (meta.defaultVisible ?? true),
-                locked: config?.locked ?? (meta.defaultLocked ?? false),
-                meta,
-            };
-        });
+        const locale = activeLocale.value;
+        return widgetDefinitions
+            .map((definition) => {
+                const meta = definition.meta;
+                const config = layout.getWidget(meta.name);
+                return {
+                    id: meta.name,
+                    visible: config?.visible ?? (meta.defaultVisible ?? true),
+                    locked: config?.locked ?? (meta.defaultLocked ?? false),
+                    meta,
+                };
+            })
+            .sort((a, b) => {
+                const aLabel = a.meta?.label ? String(i18n.global.t(a.meta.label)) : a.id;
+                const bLabel = b.meta?.label ? String(i18n.global.t(b.meta.label)) : b.id;
+                return aLabel.localeCompare(bLabel, locale);
+            });
     });
     const hiddenWidgetsCount = computed(() => widgetsWithMeta.value.filter((widget) => !widget.visible).length);
 
@@ -44,7 +54,11 @@
     }
 
     function confirmReset() {
-        if (confirm('Reset układu do domyślnego?')) layout.resetLayout();
+        if (confirm(i18n.global.t('settings.layout.resetConfirm'))) layout.resetLayout();
+    }
+
+    async function chooseLanguage(locale: SupportedLocale) {
+        await setLocale(locale, { persist: true });
     }
 </script>
 
@@ -61,7 +75,7 @@
             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600/40 bg-slate-900/65">
                 <div class="flex items-center gap-2">
                     <FontAwesomeIcon :icon="faSliders" class="text-cyan-300" />
-                    <span class="text-sm font-bold text-slate-100 font-mono">Ustawienia</span>
+                    <span class="text-sm font-bold text-slate-100 font-mono">{{ $t('settings.title') }}</span>
                 </div>
                 <button @click="$emit('close')" class="text-slate-400 hover:text-slate-100 transition-colors cursor-pointer">
                     <FontAwesomeIcon :icon="faXmark" />
@@ -70,14 +84,14 @@
 
             <div class="flex-1 overflow-y-auto p-4 space-y-6">
                 <section>
-                    <h3 class="text-xs text-cyan-300 font-mono uppercase tracking-wider mb-3">SDK</h3>
+                    <h3 class="text-xs text-cyan-300 font-mono uppercase tracking-wider mb-3">{{ $t('settings.sdk.title') }}</h3>
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs text-slate-400 font-mono">Status</span>
+                            <span class="text-xs text-slate-400 font-mono">{{ $t('settings.sdk.status') }}</span>
                             <div class="flex items-center gap-1.5">
                                 <div class="w-2 h-2 rounded-full" :class="telemetry.connected ? 'bg-green-400 animate-pulse' : 'bg-red-500'" />
                                 <span class="text-xs font-mono" :class="telemetry.connected ? 'text-green-400' : 'text-red-400'">
-                                    {{ telemetry.connected ? 'Połączony' : 'Rozłączony' }}
+                                    {{ telemetry.connected ? $t('settings.sdk.connected') : $t('settings.sdk.disconnected') }}
                                 </span>
                             </div>
                         </div>
@@ -90,18 +104,18 @@
                                     : 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20'"
                                 @click="simulator.running.value ? simulator.stop() : simulator.start()"
                             >
-                                <FontAwesomeIcon :icon="simulator.running.value ? 'stop' : 'play'" class="mr-1" />
-                                    {{ simulator.running.value ? 'Stop Demo' : 'Demo Mode' }}
+                                <FontAwesomeIcon :icon="simulator.running.value ? faStop : faPlay" class="mr-1" />
+                                    {{ simulator.running.value ? $t('settings.sdk.stopDemo') : $t('settings.sdk.demoMode') }}
                             </button>
                         </div>
                     </div>
                 </section>
 
                 <section>
-                    <h3 class="text-xs text-cyan-300 font-mono uppercase tracking-wider mb-3">Widok</h3>
+                    <h3 class="text-xs text-cyan-300 font-mono uppercase tracking-wider mb-3">{{ $t('settings.view.title') }}</h3>
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs text-slate-400 font-mono">Jednostka prędkości</span>
+                            <span class="text-xs text-slate-400 font-mono">{{ $t('settings.view.speedUnit') }}</span>
                             <div class="flex gap-1">
                                 <button
                                     v-for="unit in ['kmh', 'mph']"
@@ -116,7 +130,7 @@
                         </div>
 
                         <div class="flex items-center justify-between">
-                            <span class="text-xs text-slate-400 font-mono">Globalna przezroczystość</span>
+                            <span class="text-xs text-slate-400 font-mono">{{ $t('settings.view.globalOpacity') }}</span>
                             <span class="text-xs text-cyan-300 font-mono">{{ settingsLocal.overlayGlobalOpacity }}%</span>
                         </div>
 
@@ -128,15 +142,49 @@
                     </div>
                 </section>
 
+                <section>
+                    <h3 class="text-xs text-cyan-300 font-mono uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <FontAwesomeIcon :icon="faLanguage" class="text-cyan-300" />
+                        {{ $t('settings.language.title') }}
+                    </h3>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-400 font-mono">{{ $t('settings.language.selector') }}</span>
+                        <div class="flex gap-1">
+                            <button
+                                class="text-xs font-mono px-2 py-0.5 rounded transition-all cursor-pointer flex items-center gap-1.5"
+                                :class="activeLocale === 'en'
+                                    ? 'bg-cyan-500/20 text-cyan-300 ring-1 ring-cyan-500/70'
+                                    : 'bg-slate-800 text-slate-500 hover:text-slate-300'"
+                                @click="chooseLanguage('en')"
+                                :title="$t('settings.language.english')"
+                            >
+                                <span class="text-base leading-none">🇺🇸</span>
+                                EN
+                            </button>
+                            <button
+                                class="text-xs font-mono px-2 py-0.5 rounded transition-all cursor-pointer flex items-center gap-1.5"
+                                :class="activeLocale === 'pl'
+                                    ? 'bg-cyan-500/20 text-cyan-300 ring-1 ring-cyan-500/70'
+                                    : 'bg-slate-800 text-slate-500 hover:text-slate-300'"
+                                @click="chooseLanguage('pl')"
+                                :title="$t('settings.language.polish')"
+                            >
+                                <span class="text-base leading-none">🇵🇱</span>
+                                PL
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="overflow-auto">
                     <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-xs text-cyan-300 font-mono uppercase tracking-wider">Widgety</h3>
+                        <h3 class="text-xs text-cyan-300 font-mono uppercase tracking-wider">{{ $t('settings.widgets.title') }}</h3>
                         <button
                             v-if="hiddenWidgetsCount > 0"
                             class="text-[11px] font-mono px-2 py-1 rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors cursor-pointer"
                             @click="layout.restoreHiddenWidgets()"
                         >
-                            Przywróć ukryte ({{ hiddenWidgetsCount }})
+                            {{ $t('settings.widgets.restoreHidden', { count: hiddenWidgetsCount }) }}
                         </button>
                     </div>
                     <div class="space-y-1.5 overflow-auto max-h-70">
@@ -147,14 +195,14 @@
                         >
                             <div class="flex items-center gap-2">
                                 <FontAwesomeIcon :icon="widget.meta?.icon || 'cubes'" class="text-slate-500 text-xs w-4" />
-                                <span class="text-xs text-slate-300 font-mono">{{ widget.meta?.label || widget.id }}</span>
+                                <span class="text-xs text-slate-300 font-mono">{{ widget.meta?.label ? $t(widget.meta.label) : widget.id }}</span>
                             </div>
 
                             <div class="flex items-center gap-2">
                                 <button
                                     class="text-xs transition-colors cursor-pointer"
                                     :class="widget.locked ? 'text-cyan-300' : 'text-slate-600 hover:text-slate-300'"
-                                    :title="widget.locked ? 'Zablokowany' : 'Odblokowany'"
+                                    :title="widget.locked ? $t('settings.widgets.locked') : $t('settings.widgets.unlocked')"
                                     @click="layout.toggleLocked(widget.id)"
                                 >
                                     <FontAwesomeIcon :icon="widget.locked ? faLock : faLockOpen" />
@@ -167,7 +215,7 @@
                                         : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'"
                                     @click="layout.setVisible(widget.id, !widget.visible)"
                                 >
-                                    {{ widget.visible ? 'Ukryj' : 'Przywróć' }}
+                                    {{ widget.visible ? $t('settings.widgets.hide') : $t('settings.widgets.restore') }}
                                 </button>
                             </div>
                         </div>
@@ -175,7 +223,7 @@
                 </section>
 
                 <section>
-                    <h3 class="text-xs text-cyan-300 font-mono uppercase tracking-wider mb-3">Układ</h3>
+                    <h3 class="text-xs text-cyan-300 font-mono uppercase tracking-wider mb-3">{{ $t('settings.layout.title') }}</h3>
                     <div class="flex gap-2">
                         <button
                             class="flex-1 text-xs font-mono py-1.5 rounded border transition-all cursor-pointer"
@@ -183,7 +231,7 @@
                             @click="layout.toggleEditMode()"
                         >
                             <FontAwesomeIcon :icon="faArrowsUpDownLeftRight" class="mr-1" />
-                            {{ layout.editMode ? 'Zakończ edycję' : 'Edytuj układ' }}
+                            {{ layout.editMode ? $t('settings.layout.finishEdit') : $t('settings.layout.editLayout') }}
                         </button>
 
                         <button
@@ -203,7 +251,7 @@
                     @click="saveSettings"
                 >
                     <FontAwesomeIcon :icon="faFloppyDisk" class="mr-1.5" />
-                    Zapisz ustawienia
+                    {{ $t('settings.save') }}
                 </button>
             </div>
         </div>
