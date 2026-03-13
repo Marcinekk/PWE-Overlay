@@ -1,0 +1,26 @@
+name: Update Game Badges
+
+on:
+  push:
+    paths:
+      - 'versions.json'
+  workflow_dispatch:
+
+jobs:
+  badges:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install node-fetch@3.3.2
+
+      - name: Generate badges
+        run: |
+          node .github/scripts/generate-badges.js

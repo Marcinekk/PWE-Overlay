@@ -15,6 +15,9 @@ built on [SPF-Framework](https://github.com/TrackAndTruckDevs/SPF-Framework) and
 [![ETS2](https://img.shields.io/badge/Game-ETS2-blue)]()
 [![SPF Framework](https://img.shields.io/badge/Framework-SPF-brightgreen)](https://github.com/TrackAndTruckDevs/SPF-Framework)
 
+## Supported Games
+[![ATS](./assets/badges/ATS.svg)]()
+[![ETS2](./assets/badges/ETS2.svg)]()
 ## Acknowledgements
 
 - [@TrackAndTruckDevs](https://github.com/TrackAndTruckDevs) for creating whole Framework
@@ -32,13 +35,9 @@ This project is licensed under the Apache License 2.0 – see [LICENSE](https://
 ## Contributing
 
 - Please open an issue before submitting a pull request.
-- Follow the .github/ISSUE_TEMPLATE for bugs and feature requests.
+- Follow the [.github/ISSUE_TEMPLATE](https://github.com/Marcinekk/PWE-Overlay/blob/main/.github/ISSUE_TEMPLATE) for bugs and feature requests.
 - Use consistent code style (TypeScript / C++ conventions as in the repo).
 - Do not commit build outputs (/build or /dist).
-
-## Third Party Licenses
-
-- See THIRD_PARTY_LICENSES.md for all third-party libraries and assets used.
 
 ## Bug Reports
 
