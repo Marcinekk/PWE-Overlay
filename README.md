@@ -14,6 +14,7 @@ built on [SPF-Framework](https://github.com/TrackAndTruckDevs/SPF-Framework) and
 [![ATS](https://img.shields.io/badge/Game-ATS-blue)]()
 [![ETS2](https://img.shields.io/badge/Game-ETS2-blue)]()
 [![SPF Framework](https://img.shields.io/badge/Framework-SPF-brightgreen)](https://github.com/TrackAndTruckDevs/SPF-Framework)
+[![Support me on Ko-fi](https://img.shields.io/badge/Support-Ko--fi-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/pwe_scripts)
 
 ## Supported Games
 [![ATS](https://img.shields.io/badge/ATS-1.58.1.4-blue)]()
@@ -55,3 +56,11 @@ This project is licensed under the Apache License 2.0 – see [LICENSE](https://
 - [TailwindCSS](https://tailwindcss.com)
 - [Flowbite](https://flowbite.com/)
 - [WebView2](https://learn.microsoft.com/en-us/microsoft-edge/webview2/)
+
+## Support the project
+
+If you enjoy this project and want to support its development, you can buy me a coffee.
+
+☕ https://ko-fi.com/pwe_scripts
+
+Donations are completely optional and help cover development time.
