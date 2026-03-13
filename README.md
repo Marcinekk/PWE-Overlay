@@ -16,8 +16,8 @@ built on [SPF-Framework](https://github.com/TrackAndTruckDevs/SPF-Framework) and
 [![SPF Framework](https://img.shields.io/badge/Framework-SPF-brightgreen)](https://github.com/TrackAndTruckDevs/SPF-Framework)
 
 ## Supported Games
-[![ATS](https://github.com/Marcinekk/PWE-Overlay/raw/main/assets/badges/ATS.svg)]()
-[![ETS2](https://github.com/Marcinekk/PWE-Overlay/raw/main/assets/badges/ETS2.svg)]()
+[![ATS](https://img.shields.io/badge/ATS-1.58.1.4-blue)]()
+[![ETS2](https://img.shields.io/badge/ETS2-N/A-red)]()
 
 ## Acknowledgements
 
