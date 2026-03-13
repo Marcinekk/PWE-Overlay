@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@import "flowbite-vue/index.css";
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite-vue";
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+:root {
+    --hud-bg: rgba(8, 12, 18, 0.82);
+    --hud-bg-strong: rgba(10, 14, 22, 0.94);
+    --hud-bg-soft: rgba(23, 30, 43, 0.7);
+    --hud-border: rgba(170, 200, 230, 0.22);
+    --hud-text: #e6edf7;
+    --hud-text-muted: #8f9db1;
+    --hud-accent-cyan: #5ed4ff;
+    --hud-accent-red: #ff4f49;
+    --hud-accent-yellow: #ffd563;
+    --hud-accent-green: #6ce0a0;
+}
+
+.overlay-root {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+}
+
+.overlay-root button, .overlay-root input, .overlay-root select, .draggable-widget {
+    pointer-events: auto;
+}
+
+.widget-panel {
+    @apply rounded-xl shadow-2xl;
+    background: linear-gradient(180deg, rgba(17, 24, 37, 0.84) 0%, rgba(8, 12, 18, 0.84) 100%);
+    border: 1px solid var(--hud-border);
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.02),
+        0 12px 32px rgba(0, 0, 0, 0.48),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+}
+
+.hud-glass {
+    background: var(--hud-bg);
+    border: 1px solid var(--hud-border);
+    backdrop-filter: blur(10px);
+}
+
+.hud-glass-strong {
+    background: var(--hud-bg-strong);
+    border: 1px solid var(--hud-border);
+    backdrop-filter: blur(12px);
+}
+
+.hud-text {
+    color: var(--hud-text);
+}
+
+.hud-text-muted {
+    color: var(--hud-text-muted);
+}
+
+.hud-accent-cyan {
+    color: var(--hud-accent-cyan);
+}
+
+.hud-accent-red {
+    color: var(--hud-accent-red);
+}
+
+.hud-accent-yellow {
+    color: var(--hud-accent-yellow);
+}
+
+.hud-accent-green {
+    color: var(--hud-accent-green);
+}
+
+.widget-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.widget-panel > * {
+    position: relative;
+    z-index: 2;
+}
+
+.accent-glow {
+    filter: drop-shadow(0 0 8px rgba(94, 212, 255, 0.75));
+}
+
+.draggable-widget {
+    will-change: transform;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #4b5563; }

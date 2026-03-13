@@ -1,0 +1,43 @@
+{
+    "name": "pwe_frontend",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc -b && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^7.2.0",
+        "@fortawesome/free-brands-svg-icons": "^7.2.0",
+        "@fortawesome/free-regular-svg-icons": "^7.2.0",
+        "@fortawesome/free-solid-svg-icons": "^7.2.0",
+        "@fortawesome/vue-fontawesome": "^3.1.3",
+        "@tailwindcss/vite": "^4.2.1",
+        "@vueuse/core": "^14.2.1",
+        "animate.css": "^4.1.1",
+        "axios": "^1.13.5",
+        "flowbite": "^4.0.1",
+        "flowbite-vue": "^0.2.3",
+        "perfect-scrollbar": "^1.5.6",
+        "pinia": "^3.0.4",
+        "smooth-scrollbar": "^8.8.4",
+        "tailwindcss": "^4.2.1",
+        "vue": "^3.5.25",
+        "vue-draggable-plus": "^0.6.1",
+        "vue-router": "^5.0.3",
+        "vue-sonner": "^2.0.9",
+        "vue3-perfect-scrollbar": "^2.0.0",
+        "vuedraggable": "^2.24.3"
+    },
+    "devDependencies": {
+        "@types/node": "^24.10.1",
+        "@vitejs/plugin-vue": "^6.0.2",
+        "@vue/tsconfig": "^0.8.1",
+        "typescript": "~5.9.3",
+        "vite": "^7.3.1",
+        "vite-plugin-vue-devtools": "^8.0.6",
+        "vue-tsc": "^3.1.5"
+    }
+}
