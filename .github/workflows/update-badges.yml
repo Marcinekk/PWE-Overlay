@@ -1,35 +1,38 @@
-name: Generate Game Version Badges
+name: Generate Version Badges
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - 'versions.yml'
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   update-badges:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install -g badge-maker yaml
+      - name: Install badge-maker
+        run: npm install badge-maker
 
-      - name: Generate SVG badges
+      - name: Create assets/badges folder
+        run: mkdir -p assets/badges
+
+      - name: Read versions and generate SVG badges
         run: |
-          mkdir -p assets/badges
-          ATS_VER=$(node -e "console.log(require('fs').readFileSync('versions.yml','utf8').match(/ats: \"(.*)\"/)[1])")
-          ETS2_VER=$(node -e "console.log(require('fs').readFileSync('versions.yml','utf8').match(/ets2: \"(.*)\"/)[1])")
-          npx badge-maker "assets/badges/ATS.svg" "ATS" "$ATS_VER" "blue"
-          npx badge-maker "assets/badges/ETS2.svg" "ETS2" "$ETS2_VER" "blue"
+          ATS_VER=$(grep 'ats:' versions.yml | awk -F'"' '{print $2}')
+          ETS2_VER=$(grep 'ets2:' versions.yml | awk -F'"' '{print $2}')
+          
+          node -e "const { makeBadge } = require('badge-maker'); const fs=require('fs'); fs.writeFileSync('assets/badges/ATS.svg', makeBadge({label:'ATS', message:'$ATS_VER', color:'blue'}))"
+          node -e "const { makeBadge } = require('badge-maker'); const fs=require('fs'); fs.writeFileSync('assets/badges/ETS2.svg', makeBadge({label:'ETS2', message:'$ETS2_VER', color:'blue'}))"
 
-      - name: Commit badges
+      - name: Commit updated badges
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"

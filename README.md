@@ -18,6 +18,7 @@ built on [SPF-Framework](https://github.com/TrackAndTruckDevs/SPF-Framework) and
 ## Supported Games
 [![ATS](./assets/badges/ATS.svg)]()
 [![ETS2](./assets/badges/ETS2.svg)]()
+
 ## Acknowledgements
 
 - [@TrackAndTruckDevs](https://github.com/TrackAndTruckDevs) for creating whole Framework
