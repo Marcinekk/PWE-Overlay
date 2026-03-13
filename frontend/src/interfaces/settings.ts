@@ -11,7 +11,7 @@ interface AppSettings {
 
 const defaultSettings: AppSettings = {
     speedUnit: 'kmh',
-    language: 'pl',
+    language: 'en',
     telemetryInterval: 50,
     showGrid: false,
     accentColor: '#f59e0b',

@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import { computed, onMounted, onUnmounted, ref } from 'vue';
     import { useTelemetryStore } from '@stores/telemetry';
+    import { Locale } from '@composables/useLanguage';
 
     type TachographMode = 'auto' | 'driving' | 'work' | 'break' | 'rest';
 
@@ -181,25 +182,25 @@
 <template>
     <div class="widget-panel w-full px-4 py-3">
         <div class="flex items-center justify-between">
-            <div class="text-xs text-slate-500 font-mono uppercase tracking-wider">Tachograf</div>
+            <div class="text-xs text-slate-500 font-mono uppercase tracking-wider">{{ Locale('widgets.tachograph.name') }}</div>
             <div class="text-[10px] text-slate-400 font-mono">{{ activeMode }}</div>
         </div>
 
         <div class="mt-2 grid grid-cols-4 gap-2 text-center font-mono">
             <div>
-                <div class="text-[10px] text-slate-500">Jazda</div>
+                <div class="text-[10px] text-slate-500">{{ Locale('widgets.tachograph.driving') }}</div>
                 <div class="text-sm font-black text-cyan-300">{{ drivingLabel }}</div>
             </div>
             <div>
-                <div class="text-[10px] text-slate-500">Praca</div>
+                <div class="text-[10px] text-slate-500">{{ Locale('widgets.tachograph.work') }}</div>
                 <div class="text-sm font-black text-sky-300">{{ workLabel }}</div>
             </div>
             <div>
-                <div class="text-[10px] text-slate-500">Przerwa</div>
+                <div class="text-[10px] text-slate-500">{{ Locale('widgets.tachograph.break') }}</div>
                 <div class="text-sm font-black text-emerald-300">{{ breakLabel }}</div>
             </div>
             <div>
-                <div class="text-[10px] text-slate-500">Odp.</div>
+                <div class="text-[10px] text-slate-500">{{ Locale('widgets.tachograph.rest') }}</div>
                 <div class="text-sm font-black text-violet-300">{{ restLabel }}</div>
             </div>
         </div>
@@ -207,7 +208,7 @@
         <div class="mt-2 space-y-1.5">
             <div>
                 <div class="flex justify-between text-[10px] text-slate-400 font-mono">
-                    <span>Ciągła jazda</span>
+                    <span>{{ Locale('widgets.tachograph.continuous') }}</span>
                     <span>{{ continuousLabel }} / 04:30</span>
                 </div>
                 <div class="h-1.5 rounded bg-slate-800">
@@ -216,7 +217,7 @@
             </div>
             <div>
                 <div class="flex justify-between text-[10px] text-slate-400 font-mono">
-                    <span>Dzienna jazda</span>
+                    <span>{{ Locale('widgets.tachograph.daily_driving') }}</span>
                     <span>{{ drivingLabel }} / 09:00</span>
                 </div>
                 <div class="h-1.5 rounded bg-slate-800">
@@ -225,7 +226,7 @@
             </div>
             <div>
                 <div class="flex justify-between text-[10px] text-slate-400 font-mono">
-                    <span>Dzienna praca</span>
+                    <span>{{ Locale('widgets.tachograph.daily_work') }}</span>
                     <span>{{ workLabel }} / 13:00</span>
                 </div>
                 <div class="h-1.5 rounded bg-slate-800">
@@ -242,7 +243,7 @@
                 :class="manualMode === mode ? 'border-cyan-500/70 text-cyan-300 bg-cyan-500/20' : 'border-slate-700 text-slate-400 hover:text-slate-200'"
                 @click="selectMode(mode)"
             >
-                {{ mode }}
+                {{ Locale(`widgets.tachograph.${mode}`) }}
             </button>
         </div>
     </div>

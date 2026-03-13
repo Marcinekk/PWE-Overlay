@@ -201,7 +201,23 @@ namespace PWE {
             }
 
             if (!g_webView2Loader) {
-                g_webView2Loader = LoadLibraryW(L"WebView2Loader.dll");
+                char pluginDir[MAX_PATH] = {};
+                if (g_ctx.coreAPI && g_ctx.coreAPI->environment && g_ctx.environmentHandle) {
+                    g_ctx.coreAPI->environment->Env_GetPluginDir(g_ctx.environmentHandle, pluginDir, MAX_PATH);
+                }
+
+                std::string fullPath = std::string(pluginDir) + "WebView2Loader.dll";
+                int wlen = MultiByteToWideChar(CP_UTF8, 0, fullPath.c_str(), -1, nullptr, 0);
+                if (wlen > 0) {
+                    std::wstring widePath(wlen, L'\0');
+                    MultiByteToWideChar(CP_UTF8, 0, fullPath.c_str(), -1, widePath.data(), wlen);
+                    g_webView2Loader = LoadLibraryW(widePath.c_str());
+                }
+
+                if (!g_webView2Loader) {
+                    g_webView2Loader = LoadLibraryW(L"WebView2Loader.dll");
+                }
+
                 if (!g_webView2Loader) {
                     g_createStarted = false;
                     return false;

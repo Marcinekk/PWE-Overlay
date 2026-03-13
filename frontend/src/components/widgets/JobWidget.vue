@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import { computed } from 'vue';
     import { useTelemetryStore } from '@stores/telemetry';
+    import { Locale } from '@composables/useLanguage';
 
     import { faBriefcase, faClock, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
@@ -30,7 +31,7 @@
         <div class="widget-panel w-full h-auto px-4 py-3 overflow-auto">
             <div class="flex items-center gap-2 mb-1">
                 <FontAwesomeIcon :icon="faBriefcase" class="text-cyan-300" />
-                <span class="text-xs text-slate-400 uppercase tracking-wider font-mono">Zlecenie</span>
+                <span class="text-xs text-slate-400 uppercase tracking-wider font-mono">{{ Locale('widgets.job.name') }}</span>
 
                 <div class="ml-auto flex items-center gap-1.5">
                     <FontAwesomeIcon :icon="faClock" class="text-slate-500 text-xs" />
@@ -64,20 +65,20 @@
 
             <div class="grid grid-cols-3 gap-1.5">
                 <div class="bg-slate-800/45 rounded p-1.5 text-center col-span-2">
-                    <div class="text-xs text-slate-500 font-mono">Ładunek</div>
+                    <div class="text-xs text-slate-500 font-mono">{{ Locale('widgets.job.cargo') }}</div>
                     <div class="text-xs font-bold text-cyan-300 truncate">{{ telemetry.data.jobCargoName || '---' }}</div>
                     <div class="text-xs text-slate-500">{{ cargoMassTons }} t</div>
                 </div>
 
                 <div class="bg-slate-800/45 rounded p-1.5 text-center">
-                    <div class="text-xs text-slate-500 font-mono">Dystans</div>
+                    <div class="text-xs text-slate-500 font-mono">{{ Locale('widgets.job.distance') }}</div>
                     <div class="text-xs font-bold text-slate-100">{{ Math.round(telemetry.data.jobDistanceRemaining / 1000) || telemetry.data.jobDistance }}</div>
                     <div class="text-xs text-slate-500">km</div>
                 </div>
             </div>
 
             <div class="mt-0.5 text-center text-xs text-slate-500 font-mono">
-                Wynagrodzenie: <span class="text-green-400 font-bold">{{ incomeFormatted }}</span>
+                {{ Locale('widgets.job.income') }}: <span class="text-green-400 font-bold">{{ incomeFormatted }}</span>
             </div>
         </div>
     </transition>

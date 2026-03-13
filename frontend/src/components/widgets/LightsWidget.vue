@@ -1,34 +1,35 @@
 <script setup lang="ts">
     import { computed } from 'vue';
     import { useTelemetryStore } from '@stores/telemetry';
+    import { Locale } from '@composables/useLanguage';
 
     const telemetry = useTelemetryStore();
     const lights = computed(() => [
         {
             key: 'park',
             abbr: 'P',
-            label: 'Parking',
+            label: Locale('widgets.lights.park'),
             active: telemetry.data.lightsParking,
             level: 'warning',
         },
         {
             key: 'low',
             abbr: 'LB',
-            label: 'Światła mijania',
+            label: Locale('widgets.lights.low'),
             active: telemetry.data.lightsBeamLow,
             level: 'info',
         },
         {
             key: 'high',
             abbr: 'HB',
-            label: 'Światła drogowe',
+            label: Locale('widgets.lights.high'),
             active: telemetry.data.lightsBeamHigh,
             level: 'info',
         },
         {
             key: 'beacon',
             abbr: 'BK',
-            label: 'Kogut',
+            label: Locale('widgets.lights.beacon'),
             active: telemetry.data.lightsBeacon,
             level: 'warning',
         },
@@ -42,7 +43,7 @@
         <div
             class="blinker-arrow blinker-arrow--left"
             :class="{ 'blinker-arrow--active': telemetry.data.blinkerLeft }"
-            title="Kierunkowskaz lewy"
+            :title="Locale('widgets.lights.blinker_left')"
         >◄</div>
 
         <!-- Light indicators -->
@@ -66,7 +67,7 @@
         <div
             class="blinker-arrow blinker-arrow--right"
             :class="{ 'blinker-arrow--active': telemetry.data.blinkerRight }"
-            title="Kierunkowskaz prawy"
+            :title="Locale('widgets.lights.blinker_right')"
         >►</div>
 
     </div>

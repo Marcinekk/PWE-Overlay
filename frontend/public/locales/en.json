@@ -1,0 +1,170 @@
+{
+    "app": {
+        "title": "PWE",
+        "loading": "Loading…"
+    },
+    "settings": {
+        "title": "Settings",
+        "save": "Save settings",
+        "sdk": {
+            "title": "SDK",
+            "status": "Status",
+            "connected": "Connected",
+            "disconnected": "Disconnected",
+            "stopDemo": "Stop Demo",
+            "demoMode": "Demo Mode"
+        },
+        "view": {
+            "title": "View",
+            "speedUnit": "Speed unit",
+            "globalOpacity": "Global opacity"
+        },
+        "language": {
+            "title": "Language",
+            "selector": "Language",
+            "english": "English",
+            "polish": "Polish"
+        },
+        "widgets": {
+            "title": "Widgets",
+            "restoreHidden": "Restore hidden ({count})",
+            "locked": "Locked",
+            "unlocked": "Unlocked",
+            "hide": "Hide",
+            "restore": "Restore",
+            "resize": "Resize"
+        },
+        "layout": {
+            "title": "Layout",
+            "finishEdit": "Finish editing",
+            "editLayout": "Edit layout",
+            "editMode": "Edit mode",
+            "resetConfirm": "Reset layout to default?",
+            "on": "enabled",
+            "off": "disabled"
+        }
+    },
+    "pauseMenu": {
+        "back": "Back",
+        "quickStatus": "Quick status",
+        "speed": "Speed",
+        "finishEdit": "Finish editing",
+        "editLayout": "Edit layout",
+        "cheat": "Cheat",
+        "addMoney": "Add money",
+        "removeMoney": "Remove money",
+        "error": "Error",
+        "actions": "Actions"
+    },
+    "widgets": {
+        "alerts": {
+            "name": "Alerts",
+            "player_driver_income": "Driver income",
+            "player_job_income": "Job income",
+            "player_truck_sold": "Truck sold",
+            "player_loan_taken": "Loan taken",
+            "player_truck_sold_exchange": "Truck sold exchange",
+            "player_fined": "Fined",
+            "player_refuel": "Refuel",
+            "player_emergency_refuel": "Emergency refuel",
+            "player_service_fix": "Service fix",
+            "player_service_mod": "Service mod",
+            "player_service_renovation": "Service renovation",
+            "player_service_teleport": "Service teleport",
+            "player_job_cancelled": "Job cancelled",
+            "player_truck_bought": "Truck bought",
+            "player_truck_bought_used_online": "Truck bought used online",
+            "player_garage_teleport": "Garage teleport",
+            "player_garage_upgrade": "Garage upgrade",
+            "player_garage_bought": "Garage bought",
+            "player_garage_bought_online": "Garage bought online",
+            "player_quick_travel": "Quick travel",
+            "player_driver_hired": "Driver hired",
+            "player_loan_paid": "Loan paid",
+            "player_loan_paid_one": "Loan paid one",
+            "player_tollgate_paid": "Tollgate paid",
+            "bank": "Bank",
+            "xp": "XP"
+        },
+        "fuel": {
+            "name": "Fuel",
+            "range": "Range",
+            "consumption": "Consum."
+        },
+        "gear": {
+            "name": "Gear",
+            "park": "P",
+            "cruise": "C",
+            "motor_brake": "MB"
+        },
+        "job": {
+            "name": "Job",
+            "cargo": "Cargo",
+            "distance": "Distance",
+            "income": "Income"
+        },
+        "lights": {
+            "name": "Lights",
+            "park": "P",
+            "low": "L",
+            "high": "H",
+            "beacon": "B",
+            "blinker_left": "L",
+            "blinker_right": "P"
+        },
+        "name": {
+            "name": "Name"
+        },
+        "navigation": {
+            "name": "Navigation",
+            "to_destination": "To destination",
+            "eta": "ETA"
+        },
+        "speedometer": {
+            "name": "Speedometer",
+            "cruise": "Cruise"
+        },
+        "tachograph": {
+            "name": "Tachograph",
+            "driving": "Driving",
+            "work": "Work",
+            "break": "Break",
+            "rest": "Rest",
+            "continuous": "Continuous",
+            "daily_driving": "Daily driving",
+            "daily_work": "Daily work",
+            "auto": "Auto"
+        },
+        "tachometer": {
+            "name": "Tachometer"
+        },
+        "time": {
+            "name": "Time",
+            "game": "Game time",
+            "local": "Local time"
+        },
+        "truck-info": {
+            "name": "Truck info",
+            "odometer": "Odometer"
+        },
+        "warnings": {
+            "name": "Warnings",
+            "airEmergency": "AIR!",
+            "airWarning": "AIR",
+            "fuel": "FUEL",
+            "adblue": "ADBlue",
+            "oil": "OIL",
+            "water": "TEMP",
+            "battery": "BAT"
+        },
+        "wear": {
+            "name": "Wear",
+            "engine": "Engine",
+            "transmission": "Transm.",
+            "cabin": "Cabin",
+            "chassis": "Chassis",
+            "wheels": "Wheels",
+            "trailer": "Trailer"
+        }
+    }
+}
