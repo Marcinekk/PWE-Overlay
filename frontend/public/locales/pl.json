@@ -44,21 +44,81 @@
             "off": "wyłączony"
         }
     },
-    "pauseMenu": {
+    "pauseMenu2": {
+        "paused": "Pauza",
         "back": "Powrót",
-        "quickStatus": "Szybki status",
-        "speed": "Prędkość",
-        "finishEdit": "Zakończ edycję",
         "editLayout": "Edytuj układ",
-        "cheat": "Cheat",
-        "addMoney": "Dodaj pieniądze",
-        "removeMoney": "Usuń pieniądze",
-        "error": "Błąd",
-        "actions": "Akcje",
-        "multiplayerDisabled": "Niedostępne w trybie multiplayer",
+        "finishEdit": "Zakończ edycję",
+        "refresh": "Odśwież status",
+        "multiplayer": "Multiplayer",
+        "money": "Pieniądze",
+        "gear": "Bieg",
+        "speed": "Prędkość",
+        "language": {
+            "detected": "Wykryto",
+            "auto": "Auto",
+            "autoTitle": "Użyj wykrytego języka"
+        },
+        "tabs": {
+            "overview": "Przegląd",
+            "truck": "Ciężarówka",
+            "job": "Zlecenie",
+            "debug": "Debug"
+        },
+        "overview": {
+            "title": "Trasa",
+            "speed": "Prędkość",
+            "speedLimit": "Limit",
+            "cruise": "Tempomat",
+            "navDistance": "Do celu",
+            "navTime": "ETA"
+        },
         "warnings": {
-            "gameMismatch": "Wykryto niezgodność wersji gry! Niektóre funkcje mogą nie działać poprawnie.",
-            "frameworkMismatch": "Wykryto niezgodność frameworka! Zaleca się aktualizację pluginu."
+            "title": "Status",
+            "none": "Wszystko w normie",
+            "disconnected": "Brak telemetrii"
+        },
+        "actions": {
+            "title": "Szybkie akcje"
+        },
+        "truck": {
+            "title": "Ciężarówka",
+            "model": "Model",
+            "plate": "Tablice",
+            "odometer": "Przebieg",
+            "fuel": "Paliwo",
+            "adblue": "AdBlue",
+            "wear": "Stan",
+            "components": "Podzespoły",
+            "engine": "Silnik",
+            "transmission": "Skrzynia",
+            "cabin": "Kabina",
+            "chassis": "Podwozie",
+            "wheels": "Koła",
+            "trailer": "Naczepa"
+        },
+        "job": {
+            "title": "Zlecenie",
+            "cargo": "Ładunek",
+            "from": "Skąd",
+            "to": "Dokąd",
+            "remaining": "Pozostało",
+            "distanceRemaining": "Dystans",
+            "income": "Zarobek"
+        },
+        "debug": {
+            "title": "Debug",
+            "bridge": "Mostek pluginu",
+            "available": "dostępny",
+            "unavailable": "niedostępny",
+            "webViewFocus": "Focus WebView",
+            "editMode": "Tryb edycji",
+            "multiplayer": "Multiplayer",
+            "on": "WŁ",
+            "off": "WYŁ",
+            "devTools": "Narzędzia dev",
+            "addMoney": "Dodaj pieniądze",
+            "removeMoney": "Usuń pieniądze"
         }
     },
     "widgets": {
@@ -69,6 +129,9 @@
             "player_truck_sold": "Sprzedaż pojazdu",
             "player_loan_taken": "Pożyczka",
             "player_truck_sold_exchange": "",
+            "player_garage_sold": "Sprzedaż garażu",
+            "player_trailer_sold": "Sprzedaż naczepy",
+
             "player_fined": "Mandat",
             "player_refuel": "Tankowanie",
             "player_emergency_refuel": "Tankowanie awaryjne",
@@ -85,9 +148,12 @@
             "player_garage_bought_online": "Nieruchomość",
             "player_quick_travel": "Transport",
             "player_driver_hired": "Zatrudnienie",
+            "player_driver_expense": "Wydatek pracownika",
             "player_loan_paid": "Rata pożyczki",
             "player_loan_paid_one": "Spłata pożyczki",
             "player_tollgate_paid": "Płatna autostrada",
+            "player_ferry_paid": "Transport promem",
+            "player_train_paid": "Transport kolejowy",
             "bank": "Bank",
             "xp": "Doświadczenie"
         },

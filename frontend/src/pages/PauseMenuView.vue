@@ -1,32 +1,120 @@
 <script setup lang="ts">
-    import { computed, ref, onMounted } from 'vue';
+    import { computed, onMounted, ref } from 'vue';
     import { useRouter } from 'vue-router';
+
     import { useTelemetryStore } from '@stores/telemetry';
     import { useLayoutStore } from '@stores/layout';
     import { useSettingsStore } from '@stores/settings';
     import { usePluginBridgeStore } from '@stores/pluginBridge';
     import { useMiscStore } from '@stores/misc';
     import { Locale } from '@composables/useLanguage';
+    import { i18n, setLocale } from '../i18n';
+    import type { SupportedLocale } from '../i18n';
 
-    import { faArrowLeft, faLayerGroup, faPenToSquare, faGear, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+    import {
+        faArrowLeft,
+        faGaugeHigh,
+        faRoute,
+        faTruck,
+        faSuitcase,
+        faBug,
+        faWrench,
+        faLanguage,
+        faPlugCircleBolt,
+        faCircleExclamation,
+        faTriangleExclamation,
+    } from '@fortawesome/free-solid-svg-icons';
+
+    type TabId = 'overview' | 'truck' | 'job' | 'debug';
 
     const router = useRouter();
     const telemetry = useTelemetryStore();
     const layout = useLayoutStore();
     const settings = useSettingsStore();
     const bridge = usePluginBridgeStore();
-    const miscStore = useMiscStore();
-    const moneyDelta = ref(1000);
-    const secretClicks = ref(0);
-    const showMoneyTools = ref(false);
+    const misc = useMiscStore();
 
-    const pauseLabel = computed(() => telemetry.data.gamePaused ? 'PAUSED' : '');
-    const speedUnitLabel = computed(() => settings.settings.speedUnit === 'mph' ? 'mph' : 'km/h');
+    const activeTab = ref<TabId>('overview');
+    const moneyDelta = ref(1000);
+    const activeLocale = computed(() => i18n.global.locale.value as SupportedLocale);
+
+    const speedUnitLabel = computed(() => (settings.settings.speedUnit === 'mph' ? 'mph' : 'km/h'));
+    const isMph = computed(() => settings.settings.speedUnit === 'mph');
+
+    function normalizeLocale(value: string | null | undefined): SupportedLocale {
+        const raw = (value ?? '').trim().toLowerCase();
+        const base = raw.split(/[-_]/)[0] ?? '';
+        return base === 'pl' ? 'pl' : 'en';
+    }
+
+    const detectedLocale = computed<SupportedLocale>(() => {
+        const langs = (navigator.languages && navigator.languages.length > 0)
+            ? navigator.languages
+            : [navigator.language];
+
+        for (const lang of langs) {
+            const normalized = normalizeLocale(lang);
+            if (normalized === 'pl' || normalized === 'en') return normalized;
+        }
+        return 'en';
+    });
+
+    const detectedLocaleLabel = computed(() =>
+        detectedLocale.value === 'pl'
+            ? Locale('settings.language.polish')
+            : Locale('settings.language.english')
+    );
+
+    async function chooseLanguage(locale: SupportedLocale) {
+        await setLocale(locale, { persist: true });
+    }
+
+    function toDisplaySpeed(kmh: number): number {
+        const value = Number(kmh ?? 0);
+        if (!Number.isFinite(value)) return 0;
+        return isMph.value ? value * 0.621371 : value;
+    }
+
+    function formatDistance(meters: number): string {
+        const value = Number(meters ?? 0);
+        if (!Number.isFinite(value) || value <= 0) return '--';
+        if (value >= 1000) return `${(value / 1000).toFixed(1)} km`;
+        return `${Math.round(value)} m`;
+    }
+
+    function formatDuration(seconds: number): string {
+        const value = Number(seconds ?? 0);
+        if (!Number.isFinite(value) || value <= 0) return '--';
+        const h = Math.floor(value / 3600);
+        const m = Math.floor((value % 3600) / 60);
+        if (h > 0) return `${h}h ${m.toString().padStart(2, '0')}m`;
+        return `${m} min`;
+    }
+
+    const speedDisplay = computed(() => Math.round(toDisplaySpeed(telemetry.data.speed)));
+    const speedLimitDisplay = computed(() => Math.round(toDisplaySpeed(telemetry.data.speedLimit)));
+    const cruiseDisplay = computed(() => Math.round(toDisplaySpeed(telemetry.data.cruiseControlSpeed)));
+
     const moneyLabel = computed(() => {
         const value = Number(telemetry.data.money ?? 0);
         if (!Number.isFinite(value)) return '0';
-        return new Intl.NumberFormat('pl-PL').format(Math.round(value));
+        const locale = settings.settings.language === 'pl' ? 'pl-PL' : 'en-US';
+        return new Intl.NumberFormat(locale).format(Math.round(value));
     });
+
+    const gearLabel = computed(() => {
+        const g = telemetry.data.gear;
+        if (g === 0) return 'N';
+        if (g < 0) return 'R';
+        return String(g);
+    });
+
+    const tabs = computed(() => ([
+        { id: 'overview' as const, label: Locale('pauseMenu2.tabs.overview'), icon: faGaugeHigh },
+        { id: 'truck' as const, label: Locale('pauseMenu2.tabs.truck'), icon: faTruck },
+        { id: 'job' as const, label: Locale('pauseMenu2.tabs.job'), icon: faSuitcase },
+        { id: 'debug' as const, label: Locale('pauseMenu2.tabs.debug'), icon: faBug },
+    ]));
 
     function goBack() {
         router.push('/');
@@ -37,9 +125,9 @@
         layout.toggleSettingsMenu();
     }
 
-    function revealSecretTools() {
-        secretClicks.value += 1;
-        if (secretClicks.value >= 6) showMoneyTools.value = true;
+    function refreshInfo() {
+        bridge.sendCommand('internal/get_versions', {});
+        bridge.sendCommand('internal/get_multiplayer', {});
     }
 
     function sanitizeMoneyDelta() {
@@ -60,334 +148,748 @@
         bridge.sendCommand('economy/remove_money', { amount: moneyDelta.value });
     }
 
-    onMounted(() => {
-        bridge.sendCommand('internal/get_versions', {});
-        bridge.sendCommand('internal/get_multiplayer', {});
-    });
+    const disableEconomyTools = computed(() => !bridge.available || misc.miscSettings.isMultiplayer);
+
+    onMounted(() => refreshInfo());
 </script>
 
 <template>
-    <div class="pause-page select-none">
-        <div class="pause-page__bg" />
-        <div class="pause-page__container">
-            <div class="pause-page__header">
-                <div class="pause-page__state">{{ pauseLabel }}</div>
-                <button class="pause-page__back" @click="goBack">
-                    <FontAwesomeIcon :icon="faArrowLeft" />
-                    <span>{{ Locale('pauseMenu.back') }}</span>
-                </button>
-            </div>
-            <!--  -->
-            <div class="pause-page__title">
-                <h1>PWE</h1>
-            </div>
-            <!--  -->
-            <div class="pause-page__grid">
-                <section class="pause-card">
-                    <div class="pause-card__head">
-                        <FontAwesomeIcon :icon="faLayerGroup" />
-                        <span>{{ Locale('pauseMenu.quickStatus') }}</span>
+    <div class="pm2 select-none">
+        <div class="pm2__bg" />
+        <div class="pm2__shell">
+            <header class="pm2__header hud-glass-strong">
+                <div class="pm2__brand">
+                    <div class="pm2__logo">
+                        <span>PWE</span>
                     </div>
-                    <div class="pause-card__rows">
-                        <div><span>{{ Locale('settings.sdk.status') }}</span><strong>{{ telemetry.connected ? Locale('settings.sdk.connected') : Locale('settings.sdk.disconnected') }}</strong></div>
-                        <div><span>{{ Locale('settings.layout.editMode') }}</span><strong>{{ layout.editMode ? Locale('settings.layout.on') : Locale('settings.layout.off') }}</strong></div>
-                        <div><span>{{ Locale('settings.view.speedUnit') }}</span><strong>{{ speedUnitLabel }}</strong></div>
-                        <div><span>{{ Locale('pauseMenu.speed') }}</span><strong>{{ Math.round(telemetry.data.speed) }} {{ speedUnitLabel }}</strong></div>
-                    </div>
-                </section>
-                <!--  -->
-                <section class="pause-card">
-                    <div class="pause-card__head">
-                        <FontAwesomeIcon :icon="faPenToSquare" />
-                        <span>{{ Locale('pauseMenu.actions') }}</span>
-                    </div>
-                    <div class="pause-card__actions">
-                        <button @click="toggleEditMode">
-                            {{ layout.editMode ? Locale('pauseMenu.finishEdit') : Locale('pauseMenu.editLayout') }}
-                        </button>
-                    </div>
-                </section>
-                <!--  -->
-                <section class="pause-card" v-if="showMoneyTools" :class="{ 'pause-card--disabled': miscStore.miscSettings.isMultiplayer }">
-                    <div class="pause-card__head">
-                        <FontAwesomeIcon :icon="faGear" />
-                        <span>{{ Locale('pauseMenu.cheat') }}</span>
-                    </div>
-                    <div class="pause-card__actions">
-                        <input
-                            v-model.number="moneyDelta"
-                            type="number"
-                            min="1"
-                            step="100"
-                            class="pause-card__input"
-                            :disabled="miscStore.miscSettings.isMultiplayer"
-                        >
-                        <button :disabled="!bridge.available || miscStore.miscSettings.isMultiplayer" @click="addMoney">{{ Locale('pauseMenu.addMoney') }}</button>
-                        <button :disabled="!bridge.available || miscStore.miscSettings.isMultiplayer" @click="removeMoney">{{ Locale('pauseMenu.removeMoney') }}</button>
-                    </div>
-                    <p class="pause-card__text" v-if="bridge.lastError">{{ Locale('pauseMenu.error') }}: {{ bridge.lastError }}</p>
-                    <p class="pause-card__text text-orange-400 mt-2 font-bold" v-if="miscStore.miscSettings.isMultiplayer">{{ Locale('pauseMenu.multiplayerDisabled') }}</p>
-                </section>
-            </div>
-
-            <div v-if="miscStore.miscSettings.gameMismatch || miscStore.miscSettings.frameworkMismatch" class="mt-8 space-y-3">
-                <div v-if="miscStore.miscSettings.gameMismatch" class="pause-alert pause-alert--error">
-                    <div class="pause-alert__icon">
-                        <FontAwesomeIcon :icon="faTriangleExclamation" />
-                    </div>
-                    <div class="pause-alert__content">
-                        {{ Locale('pauseMenu.warnings.gameMismatch') }}
+                    <div class="pm2__title">
+                        <div class="pm2__title-top">
+                            <span class="pm2__paused" v-if="telemetry.data.gamePaused">{{ Locale('pauseMenu2.paused') }}</span>
+                            <span
+                                class="pm2__badge"
+                                :class="telemetry.connected ? 'pm2__badge--ok' : 'pm2__badge--bad animate__animated animate__pulse animate__infinite'"
+                            >
+                                <FontAwesomeIcon :icon="faPlugCircleBolt" />
+                                <span>{{ telemetry.connected ? Locale('settings.sdk.connected') : Locale('settings.sdk.disconnected') }}</span>
+                            </span>
+                            <span class="pm2__badge" v-if="misc.miscSettings.isMultiplayer">
+                                <FontAwesomeIcon :icon="faTriangleExclamation" />
+                                <span>{{ Locale('pauseMenu2.multiplayer') }}</span>
+                            </span>
+                        </div>
+                        <div class="pm2__title-bottom">
+                            <span class="hud-text-muted">{{ Locale('pauseMenu2.money') }}:</span>
+                            <strong class="hud-text">{{ moneyLabel }}</strong>
+                            <span class="pm2__sep">•</span>
+                            <span class="hud-text-muted">{{ Locale('pauseMenu2.gear') }}:</span>
+                            <strong class="hud-text">{{ gearLabel }}</strong>
+                            <span class="pm2__sep">•</span>
+                            <span class="hud-text-muted">{{ Locale('pauseMenu2.speed') }}:</span>
+                            <strong class="hud-text">{{ speedDisplay }} {{ speedUnitLabel }}</strong>
+                        </div>
                     </div>
                 </div>
-
-                <div v-if="miscStore.miscSettings.frameworkMismatch" class="pause-alert pause-alert--warning">
-                    <div class="pause-alert__icon">
-                        <FontAwesomeIcon :icon="faTriangleExclamation" />
-                    </div>
-                    <div class="pause-alert__content">
-                        {{ Locale('pauseMenu.warnings.frameworkMismatch') }}
-                    </div>
+                <div class="pm2__header-actions">
+                    <button class="pm2__btn" @click="goBack">
+                        <FontAwesomeIcon :icon="faArrowLeft" />
+                        <span>{{ Locale('pauseMenu2.back') }}</span>
+                    </button>
+                    <button class="pm2__btn pm2__btn--primary" @click="toggleEditMode">
+                        <FontAwesomeIcon :icon="faWrench" />
+                        <span>{{ layout.editMode ? Locale('pauseMenu2.finishEdit') : Locale('pauseMenu2.editLayout') }}</span>
+                    </button>
                 </div>
+            </header>
+
+            <div class="pm2__body">
+                <aside class="pm2__nav hud-glass-strong">
+                    <button
+                        v-for="t in tabs"
+                        :key="t.id"
+                        class="pm2__nav-item"
+                        :class="activeTab === t.id ? 'pm2__nav-item--active' : ''"
+                        @click="activeTab = t.id"
+                    >
+                        <FontAwesomeIcon :icon="t.icon" class="pm2__nav-ico" />
+                        <span>{{ t.label }}</span>
+                    </button>
+
+                    <!-- <div class="pm2__nav-divider" /> -->
+                </aside>
+
+                <main class="pm2__content">
+                    <transition
+                        mode="out-in"
+                        enter-active-class="animate__animated animate__slideInLeft animate__faster"
+                        leave-active-class="animate__animated animate__slideOutLeft animate__faster"
+                    >
+                    <section v-if="activeTab === 'overview'" key="overview" class="pm2__grid">
+                        <div class="pm2__card hud-glass">
+                            <div class="pm2__card-head">
+                                <FontAwesomeIcon :icon="faGaugeHigh" />
+                                <span>{{ Locale('pauseMenu2.overview.title') }}</span>
+                            </div>
+                            <div class="pm2__kv">
+                                <div><span>{{ Locale('pauseMenu2.overview.speed') }}</span><strong>{{ speedDisplay }} {{ speedUnitLabel }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.overview.speedLimit') }}</span><strong>{{ speedLimitDisplay > 0 ? speedLimitDisplay : '--' }} {{ speedUnitLabel }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.overview.cruise') }}</span><strong>{{ telemetry.data.cruiseControl ? `${cruiseDisplay} ${speedUnitLabel}` : '--' }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.overview.navDistance') }}</span><strong>{{ formatDistance(telemetry.data.navDistance) }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.overview.navTime') }}</span><strong>{{ formatDuration(telemetry.data.navTime) }}</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="pm2__card hud-glass">
+                            <div class="pm2__card-head">
+                                <FontAwesomeIcon :icon="faCircleExclamation" />
+                                <span>{{ Locale('pauseMenu2.warnings.title') }}</span>
+                            </div>
+                            <div class="pm2__warnings">
+                                <div v-if="!telemetry.connected" class="pm2__warn pm2__warn--bad">
+                                    <FontAwesomeIcon :icon="faTriangleExclamation" />
+                                    <span>{{ Locale('pauseMenu2.warnings.disconnected') }}</span>
+                                </div>
+                                <div v-if="misc.miscSettings.gameMismatch" class="pm2__warn pm2__warn--warn">
+                                    <FontAwesomeIcon :icon="faTriangleExclamation" />
+                                    <span>{{ Locale('pauseMenu.warnings.gameMismatch') }}</span>
+                                </div>
+                                <div v-if="misc.miscSettings.frameworkMismatch" class="pm2__warn pm2__warn--warn">
+                                    <FontAwesomeIcon :icon="faTriangleExclamation" />
+                                    <span>{{ Locale('pauseMenu.warnings.frameworkMismatch') }}</span>
+                                </div>
+                                <div
+                                    v-if="telemetry.connected && !misc.miscSettings.gameMismatch && !misc.miscSettings.frameworkMismatch"
+                                    class="pm2__warn pm2__warn--ok"
+                                >
+                                    <span>{{ Locale('pauseMenu2.warnings.none') }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pm2__card hud-glass pm2__card--wide">
+                            <div class="pm2__card-head">
+                                <FontAwesomeIcon :icon="faWrench" />
+                                <span>{{ Locale('pauseMenu2.actions.title') }}</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2.5">
+                                <button class="pm2__btn pm2__btn--ghost animate__animated animate__fadeInUp animate__faster" style="animation-delay: 35ms" @click="toggleEditMode">
+                                    <FontAwesomeIcon :icon="faWrench" />
+                                    <span>{{ layout.editMode ? Locale('pauseMenu2.finishEdit') : Locale('pauseMenu2.editLayout') }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pm2__card hud-glass pm2__card--wide">
+                            <div class="pm2__lang">
+                                <div class="pm2__lang-head">
+                                    <div class="pm2__lang-title">
+                                        <FontAwesomeIcon :icon="faLanguage" />
+                                        <span>{{ Locale('settings.language.selector') }}</span>
+                                    </div>
+                                    <div class="pm2__lang-detected">
+                                        {{ Locale('pauseMenu2.language.detected') }}: <strong>{{ detectedLocaleLabel }}</strong>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-2.5">
+                                    <button
+                                        class="pm2__lang-btn"
+                                        :class="activeLocale === 'en' ? 'pm2__lang-btn--active' : ''"
+                                        @click="chooseLanguage('en')"
+                                        :title="Locale('settings.language.english')"
+                                    >
+                                        <span class="pm2__flag">🇺🇸</span>
+                                        <span class="pm2__lang-label">{{ Locale('settings.language.english') }}</span>
+                                    </button>
+                                    <button
+                                        class="pm2__lang-btn"
+                                        style="animation-delay: 35ms"
+                                        :class="activeLocale === 'pl' ? 'pm2__lang-btn--active' : ''"
+                                        @click="chooseLanguage('pl')"
+                                        :title="Locale('settings.language.polish')"
+                                    >
+                                        <span class="pm2__flag">🇵🇱</span>
+                                        <span class="pm2__lang-label">{{ Locale('settings.language.polish') }}</span>
+                                    </button>
+                                    <button
+                                        class="pm2__lang-btn pm2__lang-btn--auto"
+                                        style="animation-delay: 70ms"
+                                        :class="activeLocale === detectedLocale ? 'pm2__lang-btn--active' : ''"
+                                        @click="chooseLanguage(detectedLocale)"
+                                        :title="Locale('pauseMenu2.language.autoTitle')"
+                                    >
+                                        <span class="pm2__flag">{{ detectedLocale === 'pl' ? '🇵🇱' : '🇺🇸' }}</span>
+                                        <span class="pm2__lang-label">{{ Locale('pauseMenu2.language.auto') }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section v-else-if="activeTab === 'truck'" key="truck" class="pm2__grid">
+                        <div class="pm2__card hud-glass pm2__card--wide">
+                            <div class="pm2__card-head">
+                                <FontAwesomeIcon :icon="faTruck" />
+                                <span>{{ Locale('pauseMenu2.truck.title') }}</span>
+                            </div>
+                            <div class="pm2__kv pm2__kv--cols">
+                                <div><span>{{ Locale('pauseMenu2.truck.model') }}</span><strong>{{ telemetry.data.truckMake }} {{ telemetry.data.truckModel }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.truck.plate') }}</span><strong>{{ telemetry.data.truckLicensePlate }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.truck.odometer') }}</span><strong>{{ Math.round(telemetry.data.odometer).toLocaleString() }} km</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.truck.fuel') }}</span><strong>{{ Math.round(telemetry.data.fuel) }} / {{ Math.round(telemetry.data.fuelMax) }} L</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.truck.adblue') }}</span><strong>{{ Math.round(telemetry.data.adblue) }} / {{ Math.round(telemetry.data.adblueMax) }} L</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.truck.wear') }}</span><strong>{{ Math.round((1 - telemetry.data.truckWear) * 100) }}%</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="pm2__card hud-glass">
+                            <div class="pm2__card-head">
+                                <FontAwesomeIcon :icon="faWrench" />
+                                <span>{{ Locale('pauseMenu2.truck.components') }}</span>
+                            </div>
+                            <div class="pm2__kv">
+                                <div><span>{{ Locale('pauseMenu2.truck.engine') }}</span><strong>{{ Math.round((1 - telemetry.data.engineWear) * 100) }}%</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.truck.transmission') }}</span><strong>{{ Math.round((1 - telemetry.data.transmissionWear) * 100) }}%</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.truck.cabin') }}</span><strong>{{ Math.round((1 - telemetry.data.cabinWear) * 100) }}%</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.truck.chassis') }}</span><strong>{{ Math.round((1 - telemetry.data.chassisWear) * 100) }}%</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.truck.wheels') }}</span><strong>{{ Math.round((1 - telemetry.data.wheelsWear) * 100) }}%</strong></div>
+                                <div v-if="telemetry.data.trailerAttached"><span>{{ Locale('pauseMenu2.truck.trailer') }}</span><strong>{{ Math.round((1 - telemetry.data.trailerWear) * 100) }}%</strong></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section v-else-if="activeTab === 'job'" key="job" class="pm2__grid">
+                        <div class="pm2__card hud-glass pm2__card--wide">
+                            <div class="pm2__card-head">
+                                <FontAwesomeIcon :icon="faRoute" />
+                                <span>{{ Locale('pauseMenu2.job.title') }}</span>
+                            </div>
+                            <div class="pm2__kv pm2__kv--cols">
+                                <div><span>{{ Locale('pauseMenu2.job.cargo') }}</span><strong>{{ telemetry.data.jobCargoName || '--' }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.job.from') }}</span><strong>{{ telemetry.data.jobSourceCity || '--' }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.job.to') }}</span><strong>{{ telemetry.data.jobDestinationCity || '--' }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.job.remaining') }}</span><strong>{{ formatDuration(telemetry.data.jobRemainingTime) }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.job.distanceRemaining') }}</span><strong>{{ formatDistance(telemetry.data.jobDistanceRemaining) }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.job.income') }}</span><strong>{{ Math.round(telemetry.data.jobIncome).toLocaleString() }}</strong></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section v-else key="debug" class="pm2__grid">
+                        <div class="pm2__card hud-glass pm2__card--wide">
+                            <div class="pm2__card-head">
+                                <FontAwesomeIcon :icon="faBug" />
+                                <span>{{ Locale('pauseMenu2.debug.title') }}</span>
+                            </div>
+
+                            <div class="pm2__kv pm2__kv--cols">
+                                <div><span>{{ Locale('pauseMenu2.debug.bridge') }}</span><strong>{{ bridge.available ? Locale('pauseMenu2.debug.available') : Locale('pauseMenu2.debug.unavailable') }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.debug.webViewFocus') }}</span><strong>{{ telemetry.data.webViewFocus ? Locale('pauseMenu2.debug.on') : Locale('pauseMenu2.debug.off') }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.debug.editMode') }}</span><strong>{{ layout.editMode ? Locale('pauseMenu2.debug.on') : Locale('pauseMenu2.debug.off') }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.debug.multiplayer') }}</span><strong>{{ misc.miscSettings.isMultiplayer ? Locale('pauseMenu2.debug.on') : Locale('pauseMenu2.debug.off') }}</strong></div>
+                            </div>
+
+                            <div class="pm2__debug-tools">
+                                <div class="pm2__debug-title">
+                                    <FontAwesomeIcon :icon="faSuitcase" />
+                                    <span>{{ Locale('pauseMenu2.debug.devTools') }}</span>
+                                </div>
+                                <div class="pm2__debug-row">
+                                    <input class="pm2__input" type="number" v-model="moneyDelta" min="1" step="1" />
+                                    <button class="pm2__btn pm2__btn--ghost" :disabled="disableEconomyTools" @click="addMoney">
+                                        <span>{{ Locale('pauseMenu2.debug.addMoney') }}</span>
+                                    </button>
+                                    <button class="pm2__btn pm2__btn--ghost" :disabled="disableEconomyTools" @click="removeMoney">
+                                        <span>{{ Locale('pauseMenu2.debug.removeMoney') }}</span>
+                                    </button>
+                                </div>
+                                <div class="pm2__hint" v-if="misc.miscSettings.isMultiplayer">{{ Locale('pauseMenu.multiplayerDisabled') }}</div>
+                                <div class="pm2__hint pm2__hint--bad" v-if="bridge.lastError">{{ Locale('pauseMenu.error') }}: {{ bridge.lastError }}</div>
+                            </div>
+                        </div>
+                    </section>
+                    </transition>
+                </main>
             </div>
         </div>
-        <div class="pause-page__money-corner">{{ moneyLabel }}</div>
-        <button
-            class="pause-page__secret-corner"
-            title="."
-            @click="revealSecretTools"
-        />
     </div>
 </template>
 
 <style scoped>
-    .pause-page {
+    .pm2 {
         position: fixed;
         inset: 0;
-        color: #e5e7eb;
-        pointer-events: auto;
+        color: var(--hud-text);
     }
 
-    .pause-page__bg {
+    .pm2__bg {
         position: absolute;
         inset: 0;
         background:
-            radial-gradient(circle at 15% 20%, rgba(94, 212, 255, 0.17), transparent 40%),
-            radial-gradient(circle at 85% 80%, rgba(255, 79, 73, 0.14), transparent 36%),
-            linear-gradient(160deg, rgba(11, 17, 27, 0.97), rgba(5, 9, 16, 0.96));
-        backdrop-filter: blur(8px);
+            radial-gradient(1000px 600px at 20% 20%, rgba(94, 212, 255, 0.12), transparent 60%),
+            radial-gradient(900px 500px at 80% 30%, rgba(94, 212, 255, 0.10), transparent 60%),
+            linear-gradient(180deg, rgba(6, 10, 16, 0.92), rgba(4, 7, 12, 0.92));
     }
 
-    .pause-page__container {
+    .pm2__bg::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url('../assets/pause-menu/scs_grid.svg');
+        opacity: 0.38;
+        pointer-events: none;
+        mix-blend-mode: screen;
+    }
+
+    .pm2__shell {
         position: relative;
-        z-index: 1;
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 28px 24px;
+        height: 100%;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        padding: 16px;
+        gap: 12px;
     }
 
-    .pause-page__money-corner {
-        position: fixed;
-        right: 8px;
-        bottom: 6px;
-        z-index: 5;
-        font-size: 11px;
-        color: rgba(230, 237, 247, 0.85);
-        letter-spacing: 0.04em;
-        background: rgba(6, 10, 16, 0.6);
-        border: 1px solid rgba(148, 163, 184, 0.4);
-        border-radius: 9999px;
-        padding: 2px 8px;
-    }
-
-    .pause-page__secret-corner {
-        position: fixed;
-        right: 0;
-        top: 0;
-        width: 28px;
-        height: 28px;
-        z-index: 6;
-        opacity: 0.02;
-        border: 0;
-        background: #fff;
-        cursor: default;
-    }
-
-    .pause-page__header {
+    .pm2__header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 20px;
+        border-radius: 16px;
+        padding: 12px 14px;
+        box-shadow:
+            0 0 0 1px rgba(255,255,255,0.02),
+            0 16px 36px rgba(0,0,0,0.55),
+            inset 0 1px 0 rgba(255,255,255,0.05);
     }
 
-    .pause-page__state {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #5ed4ff;
-    }
-
-    .pause-page__back {
-        display: inline-flex;
+    .pm2__brand {
+        display: flex;
         align-items: center;
-        gap: 8px;
-        border: 1px solid rgba(148, 163, 184, 0.45);
-        background: rgba(10, 14, 22, 0.78);
-        color: #cbd5e1;
-        border-radius: 9999px;
-        padding: 8px 12px;
-        cursor: pointer;
-        font-family: inherit;
-        font-size: 12px;
+        gap: 12px;
+        min-width: 0;
     }
 
-    .pause-page__back:hover {
-        border-color: rgba(94, 212, 255, 0.75);
+    .pm2__logo {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(94, 212, 255, 0.78);
+        background:
+            linear-gradient(180deg, rgba(94, 212, 255, 0.18), rgba(10, 14, 22, 0.92)),
+            url('../assets/pause-menu/scs_stripes.svg');
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        flex: 0 0 auto;
+    }
+
+    .pm2__logo span {
+        letter-spacing: 0.08em;
+        font-weight: 800;
         color: #67e8f9;
-    }
-
-    .pause-page__title h1 {
-        margin: 0;
-        font-size: 32px;
-        line-height: 1.1;
-        color: #e6edf7;
-    }
-
-    .pause-page__title p {
-        margin: 8px 0 0;
-        color: #8f9db1;
+        text-shadow: 0 0 10px rgba(94, 212, 255, 0.25);
         font-size: 14px;
     }
 
-    .pause-page__grid {
-        margin-top: 22px;
+    .pm2__title {
         display: grid;
-        grid-template-columns: repeat(12, minmax(0, 1fr));
-        gap: 14px;
+        gap: 6px;
+        min-width: 0;
     }
 
-    .pause-card {
-        grid-column: span 12;
-        border: 1px solid rgba(148, 163, 184, 0.32);
-        border-radius: 14px;
-        background: linear-gradient(180deg, rgba(16, 23, 36, 0.86), rgba(9, 13, 20, 0.84));
-        backdrop-filter: blur(10px);
-        padding: 14px;
+    .pm2__title-top {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
     }
 
-    .pause-card--disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
+    .pm2__paused {
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #67e8f9;
     }
 
-    .pause-card--disabled * {
-        pointer-events: none;
-    }
-
-    .pause-card__head {
+    .pm2__badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        padding: 6px 10px;
+        border-radius: 9999px;
+        border: 1px solid rgba(170, 200, 230, 0.22);
+        background: rgba(10, 14, 22, 0.58);
         font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #cbd5e1;
-        margin-bottom: 10px;
+        color: rgba(203, 213, 225, 0.95);
     }
 
-    .pause-card__rows {
-        display: grid;
-        gap: 8px;
+    .pm2__badge--ok {
+        border-color: rgba(108, 224, 160, 0.35);
+        color: rgba(108, 224, 160, 0.92);
     }
 
-    .pause-card__rows div {
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-        border-bottom: 1px solid rgba(71, 85, 105, 0.45);
-        padding-bottom: 6px;
-        font-size: 13px;
-        color: #8f9db1;
+    .pm2__badge--bad {
+        border-color: rgba(255, 79, 73, 0.35);
+        color: rgba(255, 170, 170, 0.95);
     }
 
-    .pause-card__rows strong {
-        color: #e6edf7;
-        font-weight: 700;
+    .pm2__badge--bad {
+        animation-duration: 2.2s;
     }
 
-    .pause-card__actions {
+    .pm2__title-bottom {
         display: flex;
         flex-wrap: wrap;
+        align-items: center;
         gap: 8px;
+        font-size: 13px;
+        min-width: 0;
     }
 
-    .pause-card__actions button {
-        border: 1px solid rgba(148, 163, 184, 0.36);
+    .pm2__sep {
+        opacity: 0.45;
+    }
+
+    .pm2__header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 0 0 auto;
+    }
+
+    .pm2__btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(148, 163, 184, 0.32);
         background: rgba(6, 10, 16, 0.74);
         color: #dce6f4;
-        border-radius: 10px;
-        padding: 8px 12px;
+        border-radius: 12px;
+        padding: 9px 12px;
         cursor: pointer;
         font-family: inherit;
         font-size: 12px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+        transition: border-color 120ms ease, transform 120ms ease, background 120ms ease;
     }
 
-    .pause-card__actions button:hover {
+    .pm2__btn:hover {
+        border-color: rgba(94, 212, 255, 0.78);
+        color: #67e8f9;
+        transform: translateY(-1px);
+    }
+
+    .pm2__btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .pm2__btn--primary {
+        background: rgba(6, 10, 16, 0.74);
         border-color: rgba(94, 212, 255, 0.78);
         color: #67e8f9;
     }
 
-    .pause-card__input {
-        width: 120px;
-        border: 1px solid rgba(148, 163, 184, 0.36);
+    .pm2__btn--ghost {
+        background: rgba(10, 14, 22, 0.45);
+    }
+
+    .pm2__body {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 12px;
+    }
+
+    .pm2__nav {
+        border-radius: 16px;
+        padding: 10px;
+        min-height: 0;
+        display: grid;
+        align-content: start;
+        gap: 8px;
+        box-shadow:
+            0 0 0 1px rgba(255,255,255,0.02),
+            0 14px 32px rgba(0,0,0,0.52),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .pm2__nav-item {
+        display: grid;
+        grid-template-columns: 18px 1fr;
+        align-items: center;
+        gap: 10px;
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: rgba(10, 14, 22, 0.35);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        cursor: pointer;
+        color: rgba(203, 213, 225, 0.92);
+        font-family: inherit;
+        font-size: 12px;
+        text-align: left;
+        transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+    }
+
+    .pm2__nav-item:hover {
+        border-color: rgba(94, 212, 255, 0.32);
+        background: rgba(10, 14, 22, 0.46);
+        transform: translateY(-1px);
+    }
+
+    .pm2__nav-item--active {
+        border-color: rgba(94, 212, 255, 0.78);
         background: rgba(6, 10, 16, 0.74);
-        color: #e6edf7;
-        border-radius: 10px;
+        color: #67e8f9;
+    }
+
+    .pm2__nav-ico {
+        opacity: 0.95;
+    }
+
+    .pm2__nav-divider {
+        height: 1px;
+        background: rgba(148, 163, 184, 0.18);
+        margin: 6px 4px;
+    }
+
+    .pm2__content {
+        min-height: 0;
+        overflow: auto;
+        padding: 2px;
+    }
+
+    .pm2__grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 12px;
+        padding-bottom: 12px;
+    }
+
+    .pm2__card {
+        grid-column: span 12;
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow:
+            0 0 0 1px rgba(255,255,255,0.02),
+            0 14px 32px rgba(0,0,0,0.52),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .pm2__card--wide {
+        grid-column: span 12;
+    }
+
+    .pm2__card-head {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(203, 213, 225, 0.92);
+        margin-bottom: 12px;
+    }
+
+    .pm2__kv {
+        display: grid;
+        gap: 10px;
+    }
+
+    .pm2__kv--cols {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 14px;
+    }
+
+    .pm2__kv div {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        border-bottom: 1px solid rgba(71, 85, 105, 0.42);
+        padding-bottom: 6px;
+        font-size: 13px;
+        color: rgba(143, 157, 177, 0.95);
+    }
+
+    .pm2__kv strong {
+        color: rgba(230, 237, 247, 0.96);
+        font-weight: 800;
+        letter-spacing: 0.01em;
+    }
+
+    .pm2__warnings {
+        display: grid;
+        gap: 10px;
+    }
+
+    .pm2__warn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        background: rgba(10, 14, 22, 0.45);
+        color: rgba(203, 213, 225, 0.92);
+        font-size: 13px;
+    }
+
+    .pm2__warn--ok {
+        border-color: rgba(108, 224, 160, 0.28);
+        color: rgba(108, 224, 160, 0.9);
+    }
+
+    .pm2__warn--warn {
+        border-color: rgba(94, 212, 255, 0.35);
+        color: rgba(103, 232, 249, 0.95);
+        background: rgba(6, 10, 16, 0.52);
+    }
+
+    .pm2__warn--bad {
+        border-color: rgba(255, 79, 73, 0.32);
+        color: rgba(255, 170, 170, 0.95);
+        background: rgba(255, 79, 73, 0.06);
+    }
+
+    .pm2__lang {
+        display: grid;
+        gap: 10px;
+    }
+
+    .pm2__lang-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .pm2__lang-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(203, 213, 225, 0.82);
+    }
+
+    .pm2__lang-detected {
+        font-size: 12px;
+        color: rgba(143, 157, 177, 0.95);
+    }
+
+    .pm2__lang-detected strong {
+        color: rgba(230, 237, 247, 0.96);
+        font-weight: 800;
+    }
+
+    .pm2__lang-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 12px;
         padding: 8px 10px;
+        background: rgba(10, 14, 22, 0.38);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        cursor: pointer;
+        color: rgba(203, 213, 225, 0.92);
+        font-family: inherit;
+        font-size: 12px;
+        transition: border-color 120ms ease, transform 120ms ease, background 120ms ease;
+    }
+
+    .pm2__lang-btn:hover {
+        border-color: rgba(94, 212, 255, 0.32);
+        background: rgba(10, 14, 22, 0.46);
+        transform: translateY(-1px);
+    }
+
+    .pm2__lang-btn--active {
+        border-color: rgba(94, 212, 255, 0.78);
+        background: rgba(6, 10, 16, 0.74);
+        color: #67e8f9;
+    }
+
+    .pm2__lang-btn--auto {
+        border-style: dashed;
+    }
+
+    .pm2__flag {
+        font-size: 16px;
+        line-height: 1;
+        filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.35));
+    }
+
+    .pm2__lang-label {
+        white-space: nowrap;
+    }
+
+    .pm2__debug-tools {
+        margin-top: 14px;
+        border-top: 1px solid rgba(148, 163, 184, 0.18);
+        padding-top: 14px;
+        display: grid;
+        gap: 10px;
+    }
+
+    .pm2__debug-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(203, 213, 225, 0.82);
+    }
+
+    .pm2__debug-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .pm2__input {
+        width: 160px;
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        background: rgba(6, 10, 16, 0.74);
+        color: rgba(230, 237, 247, 0.96);
+        border-radius: 12px;
+        padding: 10px 12px;
         font-family: inherit;
         font-size: 12px;
     }
 
-    .pause-card__text {
-        margin: 0;
-        color: #8f9db1;
-        font-size: 13px;
-        line-height: 1.5;
+    .pm2__hint {
+        color: rgba(143, 157, 177, 0.95);
+        font-size: 12px;
     }
 
-    .pause-alert {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        border-radius: 12px;
-        font-size: 14px;
-        backdrop-filter: blur(10px);
-    }
-
-    .pause-alert--warning {
-        background: rgba(234, 179, 8, 0.1);
-        border: 1px solid rgba(234, 179, 8, 0.3);
-        color: #fde047;
-    }
-
-    .pause-alert--error {
-        background: rgba(239, 68, 68, 0.12);
-        border: 1px solid rgba(239, 68, 68, 0.35);
-        color: #fca5a5;
-    }
-
-    .pause-alert__icon {
-        flex-shrink: 0;
-        font-size: 16px;
-    }
-
-    .pause-alert__content {
-        line-height: 1.4;
+    .pm2__hint--bad {
+        color: rgba(255, 170, 170, 0.95);
     }
 
     @media (min-width: 900px) {
-        .pause-card:nth-child(1) { grid-column: span 5; }
-        .pause-card:nth-child(2) { grid-column: span 4; }
-        .pause-card:nth-child(3) { grid-column: span 3; }
+        .pm2__card:nth-child(1) { grid-column: span 6; }
+        .pm2__card:nth-child(2) { grid-column: span 6; }
+        .pm2__card:nth-child(3) { grid-column: span 12; }
+    }
+
+    @media (max-width: 720px) {
+        .pm2__shell {
+            padding: 10px;
+        }
+        .pm2__body {
+            grid-template-columns: 1fr;
+        }
+        .pm2__nav {
+            grid-auto-flow: column;
+            grid-auto-columns: 1fr;
+            overflow: auto;
+        }
+        .pm2__nav-divider {
+            display: none;
+        }
     }
 </style>
