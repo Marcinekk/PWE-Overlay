@@ -1,11 +1,16 @@
 <script setup lang="ts">
     import { computed } from 'vue';
     import { useTelemetryStore } from '@stores/telemetry';
+    import { useSettingsStore } from '@stores/settings';
     import { Locale } from '@composables/useLanguage';
     import { faTruck } from '@fortawesome/free-solid-svg-icons';
 
     const telemetry = useTelemetryStore();
-    const odometer = computed(() => telemetry.data.odometer.toLocaleString('pl-PL') + ' km');
+    const settings = useSettingsStore();
+    const odometer = computed(() => {
+        const val = telemetry.data.odometer;
+        return settings?.settings?.speedUnit === 'kmh' ? (val * 3.6).toLocaleString('pl-PL') + ' km' : (val * 2.23694).toLocaleString('pl-PL') + ' mi';
+    });
 </script>
 
 <template>

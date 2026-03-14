@@ -11,6 +11,7 @@ namespace PWE {
     void SetWebViewOverlayFocus(bool focusWebView);
     void SetWebViewOverlayMessageCallback(WebViewMessageCallback callback);
     void UpdateWebViewOverlayBounds();
+    void TickWebViewOverlayFocusGuard();
     void ShutdownWebViewOverlay();
 
     bool PostWebViewOverlayMessageJson(const char* json);

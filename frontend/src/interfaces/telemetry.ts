@@ -78,6 +78,7 @@ interface TelemetryData {
     gameTime: number;
     localTime: Date;
     gamePaused: boolean;
+    gameName: string;
     webViewFocus: boolean;
     // Truck info
     truckMake: string;
@@ -172,6 +173,7 @@ const defaultTelemetry: TelemetryData = {
     gameTime: 480,
     localTime: new Date(),
     gamePaused: false,
+    gameName: 'none',
     webViewFocus: false,
     truckMake: 'Volvo',
     truckModel: 'FH16',

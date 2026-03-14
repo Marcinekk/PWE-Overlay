@@ -44,17 +44,82 @@
             "off": "disabled"
         }
     },
-    "pauseMenu": {
+    "pauseMenu2": {
+        "paused": "Paused",
         "back": "Back",
-        "quickStatus": "Quick status",
-        "speed": "Speed",
-        "finishEdit": "Finish editing",
         "editLayout": "Edit layout",
-        "cheat": "Cheat",
-        "addMoney": "Add money",
-        "removeMoney": "Remove money",
-        "error": "Error",
-        "actions": "Actions"
+        "finishEdit": "Finish editing",
+        "refresh": "Refresh status",
+        "multiplayer": "Multiplayer",
+        "money": "Money",
+        "gear": "Gear",
+        "speed": "Speed",
+        "language": {
+            "detected": "Detected",
+            "auto": "Auto",
+            "autoTitle": "Use detected language"
+        },
+        "tabs": {
+            "overview": "Overview",
+            "truck": "Truck",
+            "job": "Job",
+            "debug": "Debug"
+        },
+        "overview": {
+            "title": "Trip",
+            "speed": "Speed",
+            "speedLimit": "Speed limit",
+            "cruise": "Cruise control",
+            "navDistance": "To destination",
+            "navTime": "ETA"
+        },
+        "warnings": {
+            "title": "Status",
+            "none": "All systems normal",
+            "disconnected": "Telemetry disconnected"
+        },
+        "actions": {
+            "title": "Quick actions"
+        },
+        "truck": {
+            "title": "Truck",
+            "model": "Model",
+            "plate": "Plate",
+            "odometer": "Odometer",
+            "fuel": "Fuel",
+            "adblue": "AdBlue",
+            "wear": "Wear",
+            "components": "Components",
+            "engine": "Engine",
+            "transmission": "Transmission",
+            "cabin": "Cabin",
+            "chassis": "Chassis",
+            "wheels": "Wheels",
+            "trailer": "Trailer"
+        },
+        "job": {
+            "title": "Job",
+            "cargo": "Cargo",
+            "from": "From",
+            "to": "To",
+            "remaining": "Remaining",
+            "distanceRemaining": "Distance left",
+            "income": "Income"
+        },
+        "debug": {
+            "title": "Debug",
+            "bridge": "Plugin bridge",
+            "available": "available",
+            "unavailable": "unavailable",
+            "webViewFocus": "WebView focus",
+            "editMode": "Edit mode",
+            "multiplayer": "Multiplayer",
+            "on": "ON",
+            "off": "OFF",
+            "devTools": "Developer tools",
+            "addMoney": "Add money",
+            "removeMoney": "Remove money"
+        }
     },
     "widgets": {
         "alerts": {
@@ -63,7 +128,10 @@
             "player_job_income": "Job income",
             "player_truck_sold": "Truck sold",
             "player_loan_taken": "Loan taken",
-            "player_truck_sold_exchange": "Truck sold exchange",
+            "player_truck_sold_exchange": "",
+            "player_garage_sold": "Garage sold",
+            "player_trailer_sold": "Trailer sold",
+
             "player_fined": "Fined",
             "player_refuel": "Refuel",
             "player_emergency_refuel": "Emergency refuel",
@@ -80,9 +148,12 @@
             "player_garage_bought_online": "Garage bought online",
             "player_quick_travel": "Quick travel",
             "player_driver_hired": "Driver hired",
+            "player_driver_expense": "Driver expense",
             "player_loan_paid": "Loan paid",
             "player_loan_paid_one": "Loan paid one",
             "player_tollgate_paid": "Tollgate paid",
+            "player_ferry_paid": "Ferry transport",
+            "player_train_paid": "Train transport",
             "bank": "Bank",
             "xp": "XP"
         },

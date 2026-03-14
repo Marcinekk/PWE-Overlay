@@ -51,9 +51,31 @@ namespace PWE::Internal {
     }  // namespace
 
     void ApplyFocusState() {
+        static HWND lastHostWindow = nullptr;
+        static bool lastAppliedInteractive = false;
+        static bool lastAppliedFocus = false;
+
         if (!g_ctx.showWebView) g_ctx.webViewFocus = false;
-        PWE::SetWebViewOverlayInteractive(g_ctx.webViewFocus);
-        PWE::SetWebViewOverlayFocus(g_ctx.webViewFocus);
+
+        const HWND currentHostWindow = g_ctx.gameWindow;
+        const bool desiredFocus = g_ctx.showWebView && g_ctx.webViewFocus;
+        const bool desiredInteractive = desiredFocus;
+
+        if (currentHostWindow != lastHostWindow) {
+            lastHostWindow = currentHostWindow;
+            lastAppliedInteractive = !desiredInteractive;
+            lastAppliedFocus = !desiredFocus;
+        }
+
+        if (desiredInteractive != lastAppliedInteractive) {
+            PWE::SetWebViewOverlayInteractive(desiredInteractive);
+            lastAppliedInteractive = desiredInteractive;
+        }
+
+        if (desiredFocus != lastAppliedFocus) {
+            PWE::SetWebViewOverlayFocus(desiredFocus);
+            lastAppliedFocus = desiredFocus;
+        }
     }
 
     HWND ResolveGameWindow() {

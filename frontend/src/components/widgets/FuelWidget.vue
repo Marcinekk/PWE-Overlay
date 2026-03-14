@@ -1,10 +1,12 @@
 <script setup lang="ts">
     import { computed } from 'vue';
     import { useTelemetryStore } from '@stores/telemetry';
+    import { useSettingsStore } from '@stores/settings';
     import { faGasPump } from '@fortawesome/free-solid-svg-icons';
     import { Locale } from '@composables/useLanguage';
 
     const telemetry = useTelemetryStore();
+    const settings = useSettingsStore();
     const fuelPct = computed(() => telemetry.fuelPercent);
     const fuelWarning = computed(() => telemetry.data.fuelWarning || fuelPct.value < 15);
     const fuelBarColor = computed(() => {
@@ -47,7 +49,7 @@
         <div class="grid grid-cols-2 gap-2">
             <div class="bg-slate-800/45 rounded p-1.5 text-center">
                 <div class="text-xs text-slate-500 font-mono">{{ Locale('widgets.fuel.range') }}</div>
-                <div class="text-sm font-bold font-mono text-slate-100">{{ Math.round(telemetry.data.fuelRange) }} km</div>
+                <div class="text-sm font-bold font-mono text-slate-100">{{ Math.round(telemetry.data.fuelRange) }} {{ settings?.settings?.speedUnit === 'kmh' ? 'km' : 'mi' }}</div>
             </div>
             <div class="bg-slate-800/45 rounded p-1.5 text-center">
                 <div class="text-xs text-slate-500 font-mono">{{ Locale('widgets.fuel.consumption') }}</div>

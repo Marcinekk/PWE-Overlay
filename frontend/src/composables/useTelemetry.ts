@@ -3,10 +3,12 @@ import { useTelemetryStore } from '@stores/telemetry';
 import { usePluginBridgeStore } from '@stores/pluginBridge';
 
 import { useEventsStore, type PendingEvents } from '@stores/events';
+import { useMiscStore } from '@stores/misc';
 import type { WebViewMessage } from '@interfaces/WebView';
 
 function useTelemetry() {
     const store = useTelemetryStore();
+    const miscStore = useMiscStore();
     const pluginBridge = usePluginBridgeStore();
     const reconnectTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 
@@ -42,6 +44,19 @@ function useTelemetry() {
             case 'events/add': {
                 if(!message.payload) return;
                 useEventsStore().addEvent(message.payload as PendingEvents);
+                break;
+            }
+
+            case 'misc/versions': {
+                if(!message.payload) return;
+                miscStore.setGameMismatch(message.payload.game_mismatch as boolean);
+                miscStore.setFrameworkMismatch(message.payload.framework_mismatch as boolean);
+                break;
+            }
+
+            case 'misc/multiplayer': {
+                if(!message.payload) return;
+                miscStore.setMultiplayer(message.payload.is_multiplayer as boolean);
                 break;
             }
         }
