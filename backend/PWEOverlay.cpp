@@ -96,6 +96,9 @@ namespace PWE {
     }
 
     void OnUpdate() {
+        static bool lastRequestedVisibleSet = false;
+        static bool lastRequestedVisible = false;
+
         Internal::ProcessHotkeys();
         Internal::UpdateG27LEDs();
 
@@ -113,9 +116,14 @@ namespace PWE {
             const bool ready = PWE::InitializeWebViewOverlay(hostWindow);
             if (ready && !g_ctx.webViewInitLogged && g_ctx.loggerHandle && g_ctx.loadAPI) g_ctx.webViewInitLogged = true;
 
-            PWE::SetWebViewOverlayVisible(g_ctx.showWebView);
+            if (!lastRequestedVisibleSet || lastRequestedVisible != g_ctx.showWebView) {
+                PWE::SetWebViewOverlayVisible(g_ctx.showWebView);
+                lastRequestedVisible = g_ctx.showWebView;
+                lastRequestedVisibleSet = true;
+            }
             Internal::ApplyFocusState();
-            PWE::UpdateWebViewOverlayBounds();
+            if (g_ctx.showWebView) PWE::UpdateWebViewOverlayBounds();
+            if (g_ctx.showWebView && !g_ctx.webViewFocus) PWE::TickWebViewOverlayFocusGuard();
             Internal::PushTelemetryToWebView();
         } else if (g_ctx.showWebView && g_ctx.loggerHandle && g_ctx.loadAPI) {
             g_ctx.loadAPI->logger->LogThrottled(g_ctx.loggerHandle, SPF_LOG_WARN, "PWEOverlay.window_not_found", 2000, "PWEOverlay: game window not found.");
