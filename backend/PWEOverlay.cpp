@@ -109,9 +109,9 @@ namespace PWE {
 
     void BuildManifest(SPF_Manifest_Builder_Handle* h, const SPF_Manifest_Builder_API* api) {
         api->Info_SetName(h, PLUGIN_NAME);
-        api->Info_SetVersion(h, "1.0.0");
+        api->Info_SetVersion(h, "1.1");
         api->Info_SetAuthor(h, "PWE Overlay");
-        api->Info_SetMinFrameworkVersion(h, "1.0.0");
+        api->Info_SetMinFrameworkVersion(h, g_ctx.supportedFrameworkVersion);
         api->Info_SetDescriptionLiteral(h, "WebView overlay plugin for SPF.");
 
         api->Policy_SetAllowUserConfig(h, true);
