@@ -19,7 +19,7 @@ built on [SPF-Framework](https://github.com/TrackAndTruckDevs/SPF-Framework) and
 ## Supported Games
 
 [![ATS](https://img.shields.io/badge/ATS-1.58.1.4-blue)]()
-[![ETS2](https://img.shields.io/badge/ETS2-N/A-red)]()
+[![ETS2](https://img.shields.io/badge/ETS2-1.58.1.4-blue)]()
 
 ## Video
 
