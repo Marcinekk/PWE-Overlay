@@ -55,10 +55,6 @@ namespace PWE::Internal {
         g_ctx.coreAPI->telemetry->Tel_GetNavigationData(g_ctx.telemetryHandle, &navData, sizeof(navData));
         g_ctx.coreAPI->telemetry->Tel_GetTrailers(g_ctx.telemetryHandle, trailers, sizeof(SPF_Trailer), &trailerCount);
 
-        char mpStatus[32]{};
-        g_ctx.environmentAPI->Env_GetMultiplayerStatus(g_ctx.environmentHandle, mpStatus, sizeof(mpStatus));
-        g_ctx.isMultiplayer = (std::string(mpStatus) != "None");
-
         const SPF_Trailer* activeTrailer = (trailerCount > 0) ? &trailers[0] : nullptr;
         const bool trailerAttached = (activeTrailer && activeTrailer->data.connected);
         const double speedKmh = static_cast<double>(truckData.speed) * 3.6;
