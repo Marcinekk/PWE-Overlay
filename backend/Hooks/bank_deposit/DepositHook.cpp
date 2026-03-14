@@ -4,6 +4,7 @@
 #include "../../PWEOverlay.hpp"
 #include "../../Events/Events.hpp"
 #include <cstdio>
+#include <cstring>
 #include <intrin.h>
 
 namespace PWE::Hooks {
@@ -25,7 +26,7 @@ namespace PWE::Hooks {
             uintptr_t base = reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr));
             uintptr_t rva = caller - base;
 
-            const char* typeLabel = IdentifyDepositByRva(rva);
+            const char* typeLabel = IdentifyDepositByRva(rva, std::strcmp(g_ctx.gameName, "American Truck Simulator") == 0);
             if (g_ctx.loggerHandle && g_ctx.loadAPI && g_ctx.loadAPI->logger) {
                 if(!typeLabel) {
                     char msg[128];

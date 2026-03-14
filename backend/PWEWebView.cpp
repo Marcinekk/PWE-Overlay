@@ -40,6 +40,11 @@
         bool g_navigationTokenSet = false;
         bool g_localFrontendMapped = false;
 
+        bool g_lastControllerVisibleSet = false;
+        bool g_lastControllerVisible = false;
+        bool g_lastBoundsSet = false;
+        RECT g_lastBounds = {};
+
         BOOL CALLBACK FindWebViewWindowProc(HWND window, LPARAM lParam) {
             wchar_t className[256] = {};
             if (GetClassNameW(window, className, static_cast<int>(sizeof(className) / sizeof(className[0]))) > 0) {
@@ -160,26 +165,57 @@
             if (!g_webViewWindow) return;
 
             LONG_PTR exStyle = GetWindowLongPtrW(g_webViewWindow, GWL_EXSTYLE);
-            if (g_interactive) {
-                exStyle &= ~WS_EX_TRANSPARENT;
-            } else {
-                exStyle |= WS_EX_TRANSPARENT;
-            }
+            const bool shouldBeTransparent = !g_interactive;
+            const bool isTransparent = (exStyle & WS_EX_TRANSPARENT) != 0;
+            const bool shouldNoActivate = !g_interactive;
+            const bool isNoActivate = (exStyle & WS_EX_NOACTIVATE) != 0;
+
+            if (shouldBeTransparent == isTransparent && shouldNoActivate == isNoActivate) return;
+
+            if (shouldBeTransparent) exStyle |= WS_EX_TRANSPARENT;
+            else exStyle &= ~WS_EX_TRANSPARENT;
+
+            if (shouldNoActivate) exStyle |= WS_EX_NOACTIVATE;
+            else exStyle &= ~WS_EX_NOACTIVATE;
+
             SetWindowLongPtrW(g_webViewWindow, GWL_EXSTYLE, exStyle);
-            SetWindowPos(g_webViewWindow, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+            SetWindowPos(g_webViewWindow, nullptr, 0, 0, 0, 0,
+                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
         }
 
         void UpdateBoundsInternal() {
             if (!g_hostWindow || !g_controller) return;
             RECT rect = {};
-            if (GetClientRect(g_hostWindow, &rect)) g_controller->put_Bounds(rect);
+            if (!GetClientRect(g_hostWindow, &rect)) return;
+            if (g_lastBoundsSet &&
+                rect.left == g_lastBounds.left && rect.top == g_lastBounds.top &&
+                rect.right == g_lastBounds.right && rect.bottom == g_lastBounds.bottom)
+            {
+                return;
+            }
+
+            g_lastBounds = rect;
+            g_lastBoundsSet = true;
+            g_controller->put_Bounds(rect);
         }
 
         void UpdateVisibilityInternal() {
             if (!g_controller) return;
-            g_controller->put_IsVisible(g_requestedVisible ? TRUE : FALSE);
+            const bool desiredVisible = g_requestedVisible;
+            if (!g_lastControllerVisibleSet || g_lastControllerVisible != desiredVisible) {
+                g_controller->put_IsVisible(desiredVisible ? TRUE : FALSE);
+                g_lastControllerVisible = desiredVisible;
+                g_lastControllerVisibleSet = true;
+            }
             if (!g_requestedVisible) g_interactive = false;
             ApplyInteractivityInternal();
+        }
+
+        bool IsFocusInsideWebView() {
+            if (!g_webViewWindow || !IsWindow(g_webViewWindow)) return false;
+            const HWND focus = GetFocus();
+            if (!focus) return false;
+            return focus == g_webViewWindow || IsChild(g_webViewWindow, focus);
         }
     } //namespace
 #endif
@@ -190,7 +226,13 @@ namespace PWE {
         if (!hostWindow) return false;
 
         #if HAS_WEBVIEW2
-            g_hostWindow = hostWindow;
+            if (g_hostWindow != hostWindow) {
+                g_hostWindow = hostWindow;
+                g_webViewWindow = nullptr;
+                g_lastBoundsSet = false;
+            } else {
+                g_hostWindow = hostWindow;
+            }
             if (g_controller) return true;
             if (g_createStarted) return false;
 
@@ -422,13 +464,11 @@ namespace PWE {
                 if (g_controller) g_controller->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);
 
                 if (g_webViewWindow && IsWindow(g_webViewWindow)) {
-                    SetForegroundWindow(g_hostWindow);
                     SetFocus(g_webViewWindow);
                 }
                 return;
             }
 
-            SetForegroundWindow(g_hostWindow);
             SetActiveWindow(g_hostWindow);
             SetFocus(g_hostWindow);
         #else
@@ -475,6 +515,19 @@ namespace PWE {
         #endif
     }
 
+    void TickWebViewOverlayFocusGuard() {
+        #if HAS_WEBVIEW2
+            if (!g_hostWindow || !g_webViewWindow) return;
+            if (!IsWindow(g_hostWindow) || !IsWindow(g_webViewWindow)) return;
+            if (g_interactive) return;
+            if (GetForegroundWindow() != g_hostWindow) return;
+            if (!IsFocusInsideWebView()) return;
+
+            SetActiveWindow(g_hostWindow);
+            SetFocus(g_hostWindow);
+        #endif
+    }
+
     void ShutdownWebViewOverlay() {
         #if HAS_WEBVIEW2
             if (g_webView && g_messageTokenSet) {
@@ -496,6 +549,8 @@ namespace PWE {
             g_controller.Reset();
             g_environment.Reset();
             g_webViewWindow = nullptr;
+            g_lastBoundsSet = false;
+            g_lastControllerVisibleSet = false;
 
             if (g_webView2Loader) {
                 FreeLibrary(g_webView2Loader);

@@ -151,6 +151,25 @@ namespace PWE::Internal {
             return;
         }
 
+        if (command == "internal/get_versions") {
+            char response[512] = {};
+            std::snprintf(response, sizeof(response),
+                R"({"type":"misc/versions","payload":{"requestId":"%s","ok":%s,"framework_mismatch":%s,"game_mismatch":%s}})",
+                requestId.c_str(), "true", g_ctx.mismatchFrameworkVersion ? "true" : "false",
+                g_ctx.mismatchGameVersion ? "true" : "false");
+            PWE::PostWebViewOverlayMessageJson(response);
+            return;
+        }
+
+        if (command == "internal/get_multiplayer") {
+            char response[512] = {};
+            std::snprintf(response, sizeof(response),
+                R"({"type":"misc/multiplayer","payload":{"requestId":"%s","ok":%s,"is_multiplayer":%s}})",
+                requestId.c_str(), "true", g_ctx.isMultiplayer ? "true" : "false");
+            PWE::PostWebViewOverlayMessageJson(response);
+            return;
+        }
+
         SendCommandResponse(requestId, false, "unknown_command");
     }
 }  // namespace PWE::Internal

@@ -8,8 +8,9 @@
     const settings = useSettingsStore();
 
     const speedLimitDisplay = computed(() => {
-        const lim = telemetry.data.navSpeedLimit || telemetry.data.speedLimit;
-        return Math.round(settings.settings.speedUnit === 'kmh' ? lim : lim * 0.621371);
+        const lim = settings?.settings?.speedUnit === 'kmh' ? ((telemetry.data.navSpeedLimit || telemetry.data.speedLimit) * 3.6) : ((telemetry.data.navSpeedLimit || telemetry.data.speedLimit) * 2.23694);
+        const limit = Math.round(lim);
+        return limit > 0 ? limit : 0;
     });
 
     const speedLimitStyle = computed(() => {

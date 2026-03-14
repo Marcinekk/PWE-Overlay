@@ -19,7 +19,7 @@
     const incomeFormatted = computed(() => {
         const n = telemetry.data.jobIncome;
         if (!n) return '---';
-        return n.toLocaleString('pl-PL') + ' €';
+        return telemetry.data.gameName === 'ats' ? n.toLocaleString('pl-PL') + ' $' : n.toLocaleString('pl-PL') + ' €';
     });
 </script>
 
