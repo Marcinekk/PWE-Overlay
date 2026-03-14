@@ -57,19 +57,16 @@ namespace PWE::Internal {
 
         const SPF_Trailer* activeTrailer = (trailerCount > 0) ? &trailers[0] : nullptr;
         const bool trailerAttached = (activeTrailer && activeTrailer->data.connected);
-        const double speedKmh = static_cast<double>(truckData.speed) * 3.6;
-        const double speedLimitKmh = static_cast<double>(navData.navigation_speed_limit) * 3.6;
-        const double cruiseKmh = static_cast<double>(truckData.cruise_control_speed) * 3.6;
         const double adblueCapacity = static_cast<double>(truckConstants.adblue_capacity);
 
         std::ostringstream ss;
         ss.setf(std::ios::fixed);
         ss.precision(3);
         ss << R"({"type":"telemetry/frame","payload":{)";
-        ss << R"("speed":)" << speedKmh;
-        ss << R"(,"speedLimit":)" << speedLimitKmh;
+        ss << R"("speed":)" << truckData.speed;
+        ss << R"(,"speedLimit":)" << navData.navigation_speed_limit;
         ss << R"(,"cruiseControl":)" << (truckData.cruise_control_speed > 0.1f ? "true" : "false");
-        ss << R"(,"cruiseControlSpeed":)" << cruiseKmh;
+        ss << R"(,"cruiseControlSpeed":)" << truckData.cruise_control_speed;
         ss << R"(,"rpm":)" << truckData.engine_rpm;
         ss << R"(,"rpmMax":)" << truckConstants.rpm_limit;
         ss << R"(,"gear":)" << truckData.gear;
@@ -107,7 +104,7 @@ namespace PWE::Internal {
         ss << R"(,"onJob":)" << (jobData.on_job ? "true" : "false");
         ss << R"(,"navDistance":)" << navData.navigation_distance;
         ss << R"(,"navTime":)" << navData.navigation_time;
-        ss << R"(,"navSpeedLimit":)" << speedLimitKmh;
+        ss << R"(,"navSpeedLimit":)" << navData.navigation_speed_limit;
         ss << R"(,"blinkerLeft":)" << (truckData.light_lblinker ? "true" : "false");
         ss << R"(,"blinkerRight":)" << (truckData.light_rblinker ? "true" : "false");
         ss << R"(,"hazardBlinker":)" << (truckData.hazard_warning ? "true" : "false");
@@ -137,6 +134,7 @@ namespace PWE::Internal {
         ss << R"(,"adblueMax":)" << (adblueCapacity > 0.0 ? adblueCapacity : 60.0);
         ss << R"(,"gameTime":)" << commonData.game_time;
         ss << R"(,"gamePaused":)" << (gameState.paused ? "true" : "false");
+        ss << R"(,"gameName":")" << JsonEscape(gameState.game_id) << "\"";
         ss << R"(,"webViewFocus":)" << (g_ctx.webViewFocus ? "true" : "false");
         ss << R"(,"truckMake":")" << JsonEscape(truckConstants.brand) << "\"";
         ss << R"(,"truckModel":")" << JsonEscape(truckConstants.name) << "\"";

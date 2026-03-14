@@ -2,11 +2,13 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import type { TelemetryData } from '@interfaces/telemetry';
 import { defaultTelemetry } from '@interfaces/telemetry';
+import { useSettingsStore } from './settings';
 
 const useTelemetryStore = defineStore('telemetry', () => {
     const data = ref<TelemetryData>({ ...defaultTelemetry });
     const connected = ref(false);
     const lastUpdate = ref<Date | null>(null);
+    const settings = useSettingsStore();
 
     const speedKmh = computed(() => Math.round(data.value.speed));
     const speedPercent = computed(() => Math.min((data.value.speed / 150) * 100, 100));
@@ -42,8 +44,13 @@ const useTelemetryStore = defineStore('telemetry', () => {
 
     const navDistanceFormatted = computed(() => {
         const d = data.value.navDistance;
-        if (d >= 1000) return `${(d / 1000).toFixed(1)} km`;
-        return `${Math.round(d)} m`;
+        if (settings.settings.speedUnit === 'kmh') {
+            if (d >= 1000) return `${(d / 1000).toFixed(1)} km`;
+            return `${Math.round(d)} m`;
+        } else {
+            if (d >= 1609.34) return `${(d / 1609.34).toFixed(1)} mi`;
+            return `${Math.round(d / 1609.34)} mi`;
+        }
     });
 
     const navTimeFormatted = computed(() => {

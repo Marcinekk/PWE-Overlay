@@ -11,13 +11,14 @@
     const maxSpeed = computed(() => settings.settings.speedUnit === 'kmh' ? 160 : 100);
 
     const speedDisplay = computed(() => {
-        const spd = telemetry.data.speed;
-        return Math.round(settings.settings.speedUnit === 'kmh' ? spd : spd * 0.621371);
+        const spd = settings?.settings?.speedUnit == 'kmh' ? (telemetry.data.speed * 3.6) : (telemetry.data.speed * 2.23694);
+        return Math.round(spd);
     });
 
     const speedLimitDisplay = computed(() => {
-        const lim = telemetry.data.speedLimit;
-        return Math.round(settings.settings.speedUnit === 'kmh' ? lim : lim * 0.621371);
+        const lim = settings?.settings?.speedUnit == 'kmh' ? (telemetry.data.speedLimit * 3.6) : (telemetry.data.speedLimit * 2.23694);
+        const limit = Math.round(lim);
+        return limit > 0 ? limit : 0;
     });
 
     const isSpeeding = computed(() => telemetry.isSpeeding);
