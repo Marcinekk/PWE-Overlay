@@ -2,7 +2,7 @@
     import { ref, watch, onMounted } from 'vue';
     import { useEventsStore, type PendingEvents } from '@stores/events';
     import { useLayoutStore } from '@stores/layout';
-    import { faWallet, faArrowTrendUp, faArrowTrendDown, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+    import { faWallet, faArrowTrendUp, faArrowTrendDown, faCircleInfo, faGasPump, faWrench, faTruck, faWarehouse, faCoins, faReceipt } from '@fortawesome/free-solid-svg-icons';
     import { Locale } from '@composables/useLanguage';
 
     const layout = useLayoutStore();
@@ -63,9 +63,87 @@
         return typeLabel ? typeLabel.label : type;
     }
     
-    function getIcon(type: any) {
-        if(!type || type === 'bank') return faWallet;
-        return faCircleInfo;
+    function getIcon(event: PendingEvents | null) {
+        if (!event) return faWallet;
+        
+        switch (event.description) {
+            case 'player_fined': return faReceipt;
+            case 'player_refuel':
+            case 'player_emergency_refuel': return faGasPump;
+            case 'player_service_fix':
+            case 'player_service_mod':
+            case 'player_service_renovation': return faWrench;
+            case 'player_truck_bought':
+            case 'player_truck_bought_used_online': return faTruck;
+            case 'player_garage_bought':
+            case 'player_garage_bought_online':
+            case 'player_garage_upgrade':
+            case 'player_garage_teleport': return faWarehouse;
+            case 'player_tollgate_paid': return faCoins;
+            case 'player_loan_taken':
+            case 'player_loan_paid':
+            case 'player_loan_paid_one': return faWallet;
+            default: return event.type === 'bank' ? faWallet : faCircleInfo;
+        }
+    }
+
+    function getColorClass(event: PendingEvents | null, element: 'border' | 'iconBg' | 'text' | 'textAlt') {
+        const isIncome = event?.income === 'true';
+        let colorKey = isIncome ? 'emerald' : 'rose';
+
+        if (!isIncome && event) {
+            switch (event.description) {
+                case 'player_fined': 
+                case 'player_tollgate_paid': colorKey = 'amber'; break;
+                case 'player_refuel':
+                case 'player_emergency_refuel': colorKey = 'orange'; break;
+                case 'player_service_fix':
+                case 'player_service_mod':
+                case 'player_service_renovation': colorKey = 'yellow'; break;
+                case 'player_truck_bought':
+                case 'player_truck_bought_used_online': colorKey = 'blue'; break;
+                case 'player_garage_bought':
+                case 'player_garage_bought_online':
+                case 'player_garage_upgrade': colorKey = 'blue'; break;
+            }
+        }
+        
+        switch (colorKey) {
+            case 'amber':
+                if (element === 'border') return 'border-l-amber-400';
+                if (element === 'iconBg') return 'bg-amber-500/20 text-amber-400';
+                if (element === 'text') return 'text-amber-400';
+                break;
+            case 'orange':
+                if (element === 'border') return 'border-l-orange-400';
+                if (element === 'iconBg') return 'bg-orange-500/20 text-orange-400';
+                if (element === 'text') return 'text-orange-400';
+                break;
+            case 'yellow':
+                if (element === 'border') return 'border-l-yellow-400';
+                if (element === 'iconBg') return 'bg-yellow-500/20 text-yellow-400';
+                if (element === 'text') return 'text-yellow-400';
+                break;
+            case 'blue':
+                if (element === 'border') return 'border-l-blue-400';
+                if (element === 'iconBg') return 'bg-blue-500/20 text-blue-400';
+                if (element === 'text') return 'text-blue-400';
+                break;
+            case 'emerald':
+                if (element === 'border') return 'border-l-emerald-400';
+                if (element === 'iconBg') return 'bg-emerald-500/20 text-emerald-400';
+                if (element === 'text') return 'text-emerald-400';
+                break;
+            case 'rose':
+            default:
+                if (element === 'border') return 'border-l-rose-500';
+                if (element === 'iconBg') return 'bg-rose-500/20 text-rose-400';
+                if (element === 'text') return 'text-rose-400';
+                break;
+        }
+        
+        if (element === 'textAlt') return isIncome ? '+' : '-';
+        return '';
     }
     
     async function processQueue() {
@@ -117,14 +195,14 @@
             <div
                 v-if="(visible && currentEvent) || layout.editMode"
                 class="hud-glass p-1 rounded-2xl border-l-4 shadow-2xl overflow-hidden"
-                :class="currentEvent?.income ? 'border-l-emerald-400' : 'border-l-rose-500'"
+                :class="getColorClass(currentEvent, 'border')"
             >
                 <div class="bg-slate-900/40 backdrop-blur-md px-4 py-3 rounded-xl flex items-center gap-4">
                     <div 
                         class="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0"
-                        :class="currentEvent?.income ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'"
+                        :class="getColorClass(currentEvent, 'iconBg')"
                     >
-                        <FontAwesomeIcon :icon="currentEvent?.income ? faArrowTrendUp : faArrowTrendDown" />
+                        <FontAwesomeIcon :icon="currentEvent?.income === 'true' ? faArrowTrendUp : faArrowTrendDown" />
                     </div>
                     
                     <div class="flex-1">
@@ -136,14 +214,14 @@
                         </div>
                         <div 
                             class="text-lg font-black font-mono tracking-tight"
-                            :class="currentEvent?.income === 'true' ? 'text-emerald-400' : 'text-rose-400'"
+                            :class="getColorClass(currentEvent, 'text')"
                         >
-                            {{ currentEvent?.income === 'true' ? '+' : '-' }}{{ (currentEvent?.amount || 0).toLocaleString() }}$
+                            {{ getColorClass(currentEvent, 'textAlt') }}{{ (currentEvent?.amount || 0).toLocaleString() }}$
                         </div>
                     </div>
                     
                     <div class="opacity-10 absolute -right-2.5 -bottom-2.5 scale-150 rotate-[-15deg]">
-                        <FontAwesomeIcon :icon="getIcon(currentEvent?.type)" class="text-6xl" />
+                        <FontAwesomeIcon :icon="getIcon(currentEvent)" class="text-6xl" />
                     </div>
                 </div>
             </div>
