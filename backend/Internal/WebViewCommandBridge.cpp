@@ -12,6 +12,8 @@
 #include "../Hooks/bank_withdraw/WithdrawHook.hpp"
 
 namespace PWE::Internal {
+    bool isAction = false;
+
     namespace {
         bool ExtractStringValue(const std::string& json, const char* key, std::string& out) {
             if (!key || !key[0]) return false;
@@ -126,6 +128,22 @@ namespace PWE::Internal {
             }
         }
         return out;
+    }
+
+    void sendMiscData() {
+        char response[512] = {};
+        std::snprintf(response, sizeof(response),
+            R"({
+                "type":"misc/data",
+                "payload":{
+                    "onAction":%s,
+                    "webViewFocus":%s
+                }
+            })",
+            isAction ? "true" : "false",
+            g_ctx.webViewFocus ? "true" : "false"
+        );
+        PWE::PostWebViewOverlayMessageJson(response);
     }
 
     void HandleWebViewMessageJson(const char* jsonMessage) {

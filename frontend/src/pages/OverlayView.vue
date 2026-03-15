@@ -4,6 +4,7 @@
     import { useTelemetryStore } from '@stores/telemetry';
     import { useLayoutStore } from '@stores/layout';
     import { useSettingsStore } from '@stores/settings';
+    import { useMiscStore } from '@stores/misc';
     import { hasLocalePreference, i18n, setLocale } from '../i18n';
     import type { SupportedLocale } from '../i18n';
 
@@ -18,6 +19,7 @@
     const telemetry = useTelemetryStore();
     const layout = useLayoutStore();
     const settings = useSettingsStore();
+    const misc = useMiscStore();
     const router = useRouter();
 
     const showLanguagePicker = ref(!hasLocalePreference());
@@ -105,7 +107,7 @@
         </DraggableWidget>
 
         <button
-            v-if="telemetry?.data?.webViewFocus"
+            v-if="misc.miscSettings.webViewFocus"
             class="cursor-pointer fixed top-3 right-3 z-1999 w-9 h-9 rounded-full hud-glass text-slate-300 hover:text-cyan-300 hover:border-cyan-400/55 transition-all flex items-center justify-center"
             :class="{ 'text-cyan-300 border-cyan-400/55': layout.editMenu }"
             @click="openPauseMenu"

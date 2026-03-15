@@ -452,7 +452,7 @@
 
                             <div class="pm2__kv pm2__kv--cols">
                                 <div><span>{{ Locale('pauseMenu2.debug.bridge') }}</span><strong>{{ bridge.available ? Locale('pauseMenu2.debug.available') : Locale('pauseMenu2.debug.unavailable') }}</strong></div>
-                                <div><span>{{ Locale('pauseMenu2.debug.webViewFocus') }}</span><strong>{{ telemetry.data.webViewFocus ? Locale('pauseMenu2.debug.on') : Locale('pauseMenu2.debug.off') }}</strong></div>
+                                <div><span>{{ Locale('pauseMenu2.debug.webViewFocus') }}</span><strong>{{ misc.miscSettings.webViewFocus ? Locale('pauseMenu2.debug.on') : Locale('pauseMenu2.debug.off') }}</strong></div>
                                 <div><span>{{ Locale('pauseMenu2.debug.editMode') }}</span><strong>{{ layout.editMode ? Locale('pauseMenu2.debug.on') : Locale('pauseMenu2.debug.off') }}</strong></div>
                                 <div><span>{{ Locale('pauseMenu2.debug.multiplayer') }}</span><strong>{{ misc.miscSettings.isMultiplayer ? Locale('pauseMenu2.debug.on') : Locale('pauseMenu2.debug.off') }}</strong></div>
                             </div>

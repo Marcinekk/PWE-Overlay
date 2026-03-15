@@ -105,8 +105,10 @@ namespace PWE {
 
     void BuildManifest(SPF_Manifest_Builder_Handle* h, const SPF_Manifest_Builder_API* api) {
         api->Info_SetName(h, PLUGIN_NAME);
-        api->Info_SetVersion(h, "1.1");
-        api->Info_SetAuthor(h, "PWE Overlay");
+        api->Info_SetVersion(h, "1.2");
+        api->Info_SetAuthor(h, "PWE");
+        api->Info_SetGithubUrl(h, "https://github.com/Marcinekk/PWE-Overlay");
+        api->Info_SetWebsiteUrl(h, "https://ko-fi.com/pwe_scripts");
         api->Info_SetMinFrameworkVersion(h, g_ctx.supportedFrameworkVersion);
         api->Info_SetDescriptionLiteral(h, "WebView overlay plugin for SPF.");
 
@@ -217,6 +219,8 @@ namespace PWE {
         } else if (g_ctx.showWebView && g_ctx.loggerHandle && g_ctx.loadAPI) {
             g_ctx.loadAPI->logger->LogThrottled(g_ctx.loggerHandle, SPF_LOG_WARN, "PWEOverlay.window_not_found", 2000, "PWEOverlay: game window not found.");
         }
+
+        if (g_ctx.showWebView) Internal::sendMiscData();
     }
 
     void OnUnload() {
@@ -237,13 +241,6 @@ namespace PWE {
         g_ctx.gameWindow = nullptr;
     }
 
-    void OnSettingChanged(SPF_Config_Handle* config_handle, const char* keyPath) {
-        if (!config_handle || !keyPath) return;
-
-        g_ctx.configHandle = config_handle;
-        if (g_ctx.showWebView) PWE::NavigateWebViewOverlay();
-    }
-
     extern "C" {
         SPF_PLUGIN_EXPORT bool SPF_GetManifestAPI(SPF_Manifest_API* out_api) {
             if (!out_api) return false;
@@ -258,7 +255,6 @@ namespace PWE {
             exports->OnUnload = OnUnload;
             exports->OnUpdate = OnUpdate;
             exports->OnRegisterUI = OnRegisterUI;
-            exports->OnSettingChanged = OnSettingChanged;
             return true;
         }
     }

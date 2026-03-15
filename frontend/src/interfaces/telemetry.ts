@@ -79,7 +79,6 @@ interface TelemetryData {
     localTime: Date;
     gamePaused: boolean;
     gameName: string;
-    webViewFocus: boolean;
     // Truck info
     truckMake: string;
     truckModel: string;
@@ -100,7 +99,6 @@ interface TelemetryData {
     rotationZ: number;
     //
     money?: any;
-    onAction?: boolean;
 }
 //
 const defaultTelemetry: TelemetryData = {
@@ -174,7 +172,6 @@ const defaultTelemetry: TelemetryData = {
     localTime: new Date(),
     gamePaused: false,
     gameName: 'none',
-    webViewFocus: false,
     truckMake: 'Volvo',
     truckModel: 'FH16',
     truckLicensePlate: 'PL 1234',
@@ -190,7 +187,6 @@ const defaultTelemetry: TelemetryData = {
     rotationY: 0,
     rotationZ: 0,
     money: 0,
-    onAction: false,
 }
 //
 export type { TelemetryData };

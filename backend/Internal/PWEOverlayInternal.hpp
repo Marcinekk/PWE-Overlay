@@ -19,6 +19,7 @@ namespace PWE::Internal {
     void PushTelemetryToWebView();
     void UpdateG27LEDs();
     void HandleWebViewMessageJson(const char* jsonMessage);
+    void sendMiscData();
     void ToggleAction();
 
     extern bool isAction;

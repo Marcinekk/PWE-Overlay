@@ -15,7 +15,7 @@
 namespace PWE {
     struct PluginContext {
         PluginContext() {
-            supportedFrameworkVersion = "1.1.5";
+            supportedFrameworkVersion = "1.1.7";
             supportedATSVersion = "1.58.1.4";
             supportedETS2Version = "1.58.1.4";
         }

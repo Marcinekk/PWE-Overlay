@@ -20,7 +20,7 @@ namespace PWE::Events {
                << ",\"amount\":" << amount
                << ",\"type\":\"" << PWE::Internal::JsonEscape(safeType.c_str()) << "\""
                << ",\"description\":\"" << PWE::Internal::JsonEscape(safeDesc.c_str()) << "\"}}";
-            //
+
             std::string json = ss.str();
             PWE::PostWebViewOverlayMessageJson(json.c_str());
         }

@@ -9,8 +9,6 @@
 #include "../Hooks/bank_withdraw/WithdrawHook.hpp"
 
 namespace PWE::Internal {
-    bool isAction = false;
-
     std::string BuildTelemetryMessageJson() {
         if (!g_ctx.coreAPI || !g_ctx.coreAPI->telemetry || !g_ctx.telemetryHandle) {
             return R"({"type":"telemetry/state","payload":{"connected":false}})";
@@ -115,7 +113,6 @@ namespace PWE::Internal {
         ss << R"(,"gameTime":)" << commonData.game_time;
         ss << R"(,"gamePaused":)" << (gameState.paused ? "true" : "false");
         ss << R"(,"gameName":")" << JsonEscape(gameState.game_id) << "\"";
-        ss << R"(,"webViewFocus":)" << (g_ctx.webViewFocus ? "true" : "false");
         ss << R"(,"truckMake":")" << JsonEscape(truckConstants.brand) << "\"";
         ss << R"(,"truckModel":")" << JsonEscape(truckConstants.name) << "\"";
         ss << R"(,"truckLicensePlate":")" << JsonEscape(truckConstants.license_plate) << "\"";
@@ -131,7 +128,6 @@ namespace PWE::Internal {
         ss << R"(,"rotationY":)" << truckData.world_placement.orientation.pitch;
         ss << R"(,"rotationZ":)" << truckData.world_placement.orientation.roll;
         ss << R"(,"money":)" << PWE::Hooks::GetMoney();
-        ss << R"(,"onAction":)" << (isAction ? "true" : "false");
         ss << "}}";
         return ss.str();
     }
