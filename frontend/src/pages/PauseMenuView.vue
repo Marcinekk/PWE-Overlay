@@ -4,9 +4,10 @@
 
     import { useTelemetryStore } from '@stores/telemetry';
     import { useLayoutStore } from '@stores/layout';
-    import { useSettingsStore } from '@stores/settings';
     import { usePluginBridgeStore } from '@stores/pluginBridge';
     import { useMiscStore } from '@stores/misc';
+    import { useEventsStore } from '@stores/events';
+    import { useSettingsStore } from '@stores/settings';
     import { Locale } from '@composables/useLanguage';
     import { i18n, setLocale } from '../i18n';
     import type { SupportedLocale } from '../i18n';
@@ -23,9 +24,12 @@
         faPlugCircleBolt,
         faCircleExclamation,
         faTriangleExclamation,
+        faWallet,
+        faArrowTrendUp,
+        faArrowTrendDown,
     } from '@fortawesome/free-solid-svg-icons';
 
-    type TabId = 'overview' | 'truck' | 'job' | 'debug';
+    type TabId = 'overview' | 'truck' | 'job' | 'transactions' | 'debug';
 
     const router = useRouter();
     const telemetry = useTelemetryStore();
@@ -33,9 +37,11 @@
     const settings = useSettingsStore();
     const bridge = usePluginBridgeStore();
     const misc = useMiscStore();
+    const eventsStore = useEventsStore();
 
     const activeTab = ref<TabId>('overview');
     const moneyDelta = ref(1000);
+    const transactionFilter = ref<'all' | 'income' | 'expense'>('all');
     const activeLocale = computed(() => i18n.global.locale.value as SupportedLocale);
 
     const speedUnitLabel = computed(() => (settings.settings.speedUnit === 'mph' ? 'mph' : 'km/h'));
@@ -113,6 +119,7 @@
         { id: 'overview' as const, label: Locale('pauseMenu2.tabs.overview'), icon: faGaugeHigh },
         { id: 'truck' as const, label: Locale('pauseMenu2.tabs.truck'), icon: faTruck },
         { id: 'job' as const, label: Locale('pauseMenu2.tabs.job'), icon: faSuitcase },
+        { id: 'transactions' as const, label: Locale('pauseMenu2.tabs.transactions'), icon: faWallet },
         { id: 'debug' as const, label: Locale('pauseMenu2.tabs.debug'), icon: faBug },
     ]));
 
@@ -147,6 +154,23 @@
         sanitizeMoneyDelta();
         bridge.sendCommand('economy/remove_money', { amount: moneyDelta.value });
     }
+
+    function formatTime(timestamp?: number) {
+        if (!timestamp) return '--:--';
+        return new Date(timestamp).toLocaleTimeString(undefined, {
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+    }
+
+    const filteredTransactions = computed(() => {
+        if (transactionFilter.value === 'income') {
+            return eventsStore.transactionHistory.filter(t => t.income === 'true');
+        }
+        if (transactionFilter.value === 'expense') {
+            return eventsStore.transactionHistory.filter(t => t.income !== 'true');
+        }
+        return eventsStore.transactionHistory;
+    });
 
     const disableEconomyTools = computed(() => !bridge.available || misc.miscSettings.isMultiplayer);
 
@@ -369,6 +393,52 @@
                                 <div><span>{{ Locale('pauseMenu2.job.remaining') }}</span><strong>{{ formatDuration(telemetry.data.jobRemainingTime) }}</strong></div>
                                 <div><span>{{ Locale('pauseMenu2.job.distanceRemaining') }}</span><strong>{{ formatDistance(telemetry.data.jobDistanceRemaining) }}</strong></div>
                                 <div><span>{{ Locale('pauseMenu2.job.income') }}</span><strong>{{ Math.round(telemetry.data.jobIncome).toLocaleString() }}</strong></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section v-else-if="activeTab === 'transactions'" key="transactions" class="pm2__grid">
+                        <div class="pm2__card hud-glass pm2__card--wide flex flex-col max-h-[500px]">
+                            <div class="pm2__card-head justify-between w-full flex-none">
+                                <div class="flex items-center gap-2">
+                                    <FontAwesomeIcon :icon="faWallet" />
+                                    <span>{{ Locale('pauseMenu2.transactions.title') }}</span>
+                                </div>
+                                
+                                <div class="flex items-center gap-1">
+                                    <button class="pm2__btn" :class="transactionFilter === 'all' ? 'pm2__btn--primary' : 'pm2__btn--ghost'" @click="transactionFilter = 'all'">{{ Locale('pauseMenu2.transactions.filterAll') }}</button>
+                                    <button class="pm2__btn" :class="transactionFilter === 'income' ? 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10' : 'pm2__btn--ghost'" @click="transactionFilter = 'income'">
+                                        <FontAwesomeIcon :icon="faArrowTrendUp" />
+                                    </button>
+                                    <button class="pm2__btn" :class="transactionFilter === 'expense' ? 'border-rose-500/50 text-rose-400 bg-rose-500/10' : 'pm2__btn--ghost'" @click="transactionFilter = 'expense'">
+                                        <FontAwesomeIcon :icon="faArrowTrendDown" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div v-if="filteredTransactions.length === 0" class="flex-1 flex flex-col items-center justify-center py-6 text-sm opacity-50 font-mono">
+                                {{ Locale('pauseMenu2.transactions.empty') }}
+                            </div>
+                            
+                            <div v-else class="flex-1 flex flex-col gap-2 overflow-y-auto pr-2 custom-scrollbar">
+                                <div v-for="t in filteredTransactions" :key="t.id" class="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-black/20 hover:bg-white/5 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                                            :class="t.income === 'true' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'">
+                                            <FontAwesomeIcon :icon="t.income === 'true' ? faArrowTrendUp : faArrowTrendDown" />
+                                        </div>
+                                        <div class="flex flex-col justify-center">
+                                            <span class="text-xs uppercase tracking-wider font-bold opacity-50 leading-none mb-1">{{ t.type === 'bank' ? Locale('widgets.alerts.bank') : Locale('widgets.alerts.xp') }}</span>
+                                            <span class="text-sm font-semibold text-slate-100 leading-none">{{ Locale('widgets.alerts.' + t.description) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-end">
+                                        <span class="text-[10px] font-mono opacity-40 mb-1 leading-none">{{ formatTime(t.timestamp) }}</span>
+                                        <span class="font-mono font-bold tracking-tight text-right leading-none" :class="t.income === 'true' ? 'text-emerald-400' : 'text-rose-400'">
+                                            {{ t.income === 'true' ? '+' : '-' }}{{ (t.amount || 0).toLocaleString() }}$
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </section>

@@ -63,6 +63,7 @@
             "overview": "Przegląd",
             "truck": "Ciężarówka",
             "job": "Zlecenie",
+            "transactions": "Wydatki i przychody",
             "debug": "Debug"
         },
         "overview": {
@@ -72,6 +73,11 @@
             "cruise": "Tempomat",
             "navDistance": "Do celu",
             "navTime": "ETA"
+        },
+        "transactions": {
+            "title": "Historia transakcji",
+            "filterAll": "Wszystkie",
+            "empty": "Brak historii transakcji"
         },
         "warnings": {
             "title": "Status",

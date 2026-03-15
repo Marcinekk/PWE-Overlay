@@ -63,6 +63,7 @@
             "overview": "Overview",
             "truck": "Truck",
             "job": "Job",
+            "transactions": "Transactions",
             "debug": "Debug"
         },
         "overview": {
@@ -72,6 +73,11 @@
             "cruise": "Cruise control",
             "navDistance": "To destination",
             "navTime": "ETA"
+        },
+        "transactions": {
+            "title": "Transaction History",
+            "filterAll": "All",
+            "empty": "No recent transactions found"
         },
         "warnings": {
             "title": "Status",
