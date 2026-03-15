@@ -1,18 +1,35 @@
 <script setup lang="ts">
-    import { computed, ref, onMounted, onUnmounted } from "vue";
+    import { computed, ref, onMounted, onUnmounted, watch } from "vue";
     import { useTelemetryStore } from "@stores/telemetry";
     import { faWind, faTriangleExclamation, faGasPump, faDroplet, faOilCan, faTemperatureHigh, faBatteryQuarter } from "@fortawesome/free-solid-svg-icons";
     import { Locale } from "@composables/useLanguage";
 
     const telemetry = useTelemetryStore();
     const blink = ref(true);
+    const isSweeping = ref(false);
+    
     let blinkTimer: ReturnType<typeof setInterval>;
+    let sweepTimer: ReturnType<typeof setTimeout>;
+
+    watch(() => telemetry.data.engineOn, (newVal, oldVal) => {
+        if (newVal && !oldVal) {
+            isSweeping.value = true;
+            clearTimeout(sweepTimer);
+            sweepTimer = setTimeout(() => {
+                isSweeping.value = false;
+            }, 2000);
+        }
+    });
+
     onMounted(() => {
         blinkTimer = setInterval(() => {
             blink.value = !blink.value;
         }, 600);
     });
-    onUnmounted(() => clearInterval(blinkTimer));
+    onUnmounted(() => {
+        clearInterval(blinkTimer);
+        clearTimeout(sweepTimer);
+    });
 
     const indicators = computed(() => {
         const t = telemetry.data;
@@ -68,9 +85,12 @@
             },
         ];
     });
-    //
-    const activeIndicators = computed(() => indicators.value.filter((i) => i.active));
-    const hasAny = computed(() => activeIndicators.value.length > 0);
+
+    const activeIndicators = computed(() => {
+        if (isSweeping.value) return indicators.value;
+        return indicators.value.filter((i) => i.active);
+    });
+    const hasAny = computed(() => activeIndicators.value.length > 0 || isSweeping.value);
 </script>
 
 <template>
