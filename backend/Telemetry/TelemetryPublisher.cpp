@@ -11,26 +11,6 @@
 namespace PWE::Internal {
     bool isAction = false;
 
-    namespace {
-        std::string JsonEscape(const char* src) {
-            if (!src) return "";
-            std::string out;
-            for (const unsigned char c : std::string(src)) {
-                switch (c) {
-                    case '\\': out += "\\\\"; break;
-                    case '\"': out += "\\\""; break;
-                    case '\n': out += "\\n"; break;
-                    case '\r': out += "\\r"; break;
-                    case '\t': out += "\\t"; break;
-                    default:
-                        if (c >= 0x20) out += static_cast<char>(c);
-                        break;
-                }
-            }
-            return out;
-        }
-    }  // namespace
-
     std::string BuildTelemetryMessageJson() {
         if (!g_ctx.coreAPI || !g_ctx.coreAPI->telemetry || !g_ctx.telemetryHandle) {
             return R"({"type":"telemetry/state","payload":{"connected":false}})";

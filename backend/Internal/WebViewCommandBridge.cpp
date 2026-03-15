@@ -110,6 +110,24 @@ namespace PWE::Internal {
         }
     }  // namespace
 
+    std::string JsonEscape(const char* src) {
+        if (!src) return "";
+        std::string out;
+        for (const unsigned char c : std::string(src)) {
+            switch (c) {
+                case '\\': out += "\\\\"; break;
+                case '\"': out += "\\\""; break;
+                case '\n': out += "\\n"; break;
+                case '\r': out += "\\r"; break;
+                case '\t': out += "\\t"; break;
+                default:
+                    if (c >= 0x20) out += static_cast<char>(c);
+                    break;
+            }
+        }
+        return out;
+    }
+
     void HandleWebViewMessageJson(const char* jsonMessage) {
         if (!jsonMessage || !jsonMessage[0]) return;
 
