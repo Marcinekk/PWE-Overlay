@@ -4,11 +4,13 @@ import { usePluginBridgeStore } from '@stores/pluginBridge';
 
 import { useEventsStore, type PendingEvents } from '@stores/events';
 import { useMiscStore } from '@stores/misc';
+import { useTransactionsStore } from '@stores/transactions';
 import type { WebViewMessage } from '@interfaces/WebView';
 
 function useTelemetry() {
     const store = useTelemetryStore();
     const miscStore = useMiscStore();
+    const transactionsStore = useTransactionsStore();
     const pluginBridge = usePluginBridgeStore();
     const reconnectTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 
@@ -65,6 +67,18 @@ function useTelemetry() {
                 for (const [key, value] of Object.entries(message.payload)) {
                     miscStore.set(key, value);
                 }
+                break;
+            }
+
+            case 'transactions/list': {
+                if(!message.payload?.items) return;
+                transactionsStore.setAll(message.payload.items);
+                break;
+            }
+
+            case 'transactions/manual_approve': {
+                if(!message.payload) return;
+                miscStore.set('isManualTransactionApprove', Boolean(message.payload?.approve));
                 break;
             }
         }

@@ -47,6 +47,7 @@
     "pauseMenu2": {
         "paused": "Pauza",
         "back": "Powrót",
+        "error": "Błąd",
         "editLayout": "Edytuj układ",
         "finishEdit": "Zakończ edycję",
         "refresh": "Odśwież status",
@@ -76,8 +77,19 @@
         },
         "transactions": {
             "title": "Historia transakcji",
+            "manualApprove": "Zatwierdź ręcznie",
+            "manualApproveDescription": "Zatwierdź transakcje ręcznie",
+            "truncateTransactions": "Usuń transakcje",
+            "truncateTransactionsDescription": "Usuń wszystkie transakcje z bazy danych",
             "filterAll": "Wszystkie",
-            "empty": "Brak historii transakcji"
+            "filterPending": "Oczekujące",
+            "filterApproved": "Zatwierdzone",
+            "filterRejected": "Odrzucone",
+            "empty": "Brak historii transakcji",
+            "truncateConfirmTitle": "Usuwanie rekordów",
+            "truncateConfirmMessage": "Czy na pewno chcesz usunąć wszystkie rekordy transakcji? Tej operacji nie można cofnąć.",
+            "truncateConfirmDelete": "Usuń wszystko",
+            "truncateConfirmCancel": "Anuluj"
         },
         "warnings": {
             "title": "Status",

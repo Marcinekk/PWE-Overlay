@@ -2,6 +2,7 @@
     import { onMounted, onUnmounted } from 'vue';
     import { useRouter, useRoute } from 'vue-router';
     import { useTelemetry } from '@composables/useTelemetry';
+    import Modal from '@components/Modal.vue';
 
     const router = useRouter();
     const route = useRoute();
@@ -25,4 +26,5 @@
 
 <template>
     <router-view />
+    <Modal />
 </template>

@@ -10,6 +10,7 @@
 #include "../PWEWebView.hpp"
 #include "../Hooks/bank_deposit/DepositHook.hpp"
 #include "../Hooks/bank_withdraw/WithdrawHook.hpp"
+#include "../Storage/DatabaseManager.hpp"
 
 namespace PWE::Internal {
     bool isAction = false;
@@ -203,6 +204,85 @@ namespace PWE::Internal {
                 R"({"type":"misc/multiplayer","payload":{"requestId":"%s","ok":%s,"is_multiplayer":%s}})",
                 requestId.c_str(), "true", g_ctx.isMultiplayer ? "true" : "false");
             PWE::PostWebViewOverlayMessageJson(response);
+            return;
+        }
+
+        if (command == "transactions/get") {
+            std::string statusFilter;
+            ExtractStringValue(json, "status", statusFilter);
+
+            int64_t limit = 100;
+            ExtractInt64Value(json, "limit", limit);
+
+            const std::string arr = PWE::Storage::QueryTransactionsJson(
+                statusFilter.empty() ? nullptr : statusFilter.c_str(),
+                static_cast<int>(limit));
+
+            char header[256] = {};
+            std::snprintf(header, sizeof(header),
+                R"({"type":"transactions/list","payload":{"requestId":"%s","items":)",
+                requestId.c_str());
+
+            std::string msg = std::string(header) + arr + "}}";
+            PWE::PostWebViewOverlayMessageJson(msg.c_str());
+            return;
+        }
+
+        if (command == "transactions/truncate") {
+            PWE::Storage::ClearTransactions();
+            SendCommandResponse(requestId, true, "transactions_truncated");
+            return;
+        }
+
+        if (command == "transactions/set_manual_approve") {
+            bool approve = false;
+            if (!ExtractBoolValue(json, "approve", approve)) {
+                SendCommandResponse(requestId, false, "missing_approve");
+                return;
+            }
+            PWE::Storage::SetManualTransactionApprove(approve);
+            SendCommandResponse(requestId, true, "manual_approve_set");
+            return;
+        }
+
+        if (command == "transactions/get_manual_approve") {
+            const bool approve = PWE::Storage::isManualTransactionApprove();
+            char response[256] = {};
+            std::snprintf(response, sizeof(response),
+                R"({"type":"transactions/manual_approve","payload":{"requestId":"%s","approve":%s}})",
+                requestId.c_str(), approve ? "true" : "false"
+            );
+            PWE::PostWebViewOverlayMessageJson(response);
+            return;
+        }
+
+        if (command == "transactions/approve") {
+            int64_t id = 0;
+            if (!ExtractInt64Value(json, "id", id)) {
+                SendCommandResponse(requestId, false, "missing_id");
+                return;
+            }
+
+            const bool ok = PWE::Storage::SetStatus(id, "approved");
+            SendCommandResponse(requestId, ok, ok ? "approved" : "db_error");
+
+            if (ok) {
+                const int64_t amount = PWE::Storage::GetTransactionAmount(id);
+                if (amount > 0) PWE::Hooks::RemoveMoney(amount);
+            }
+
+            return;
+        }
+
+        if (command == "transactions/reject") {
+            int64_t id = 0;
+            if (!ExtractInt64Value(json, "id", id)) {
+                SendCommandResponse(requestId, false, "missing_id");
+                return;
+            }
+
+            const bool ok = PWE::Storage::SetStatus(id, "rejected");
+            SendCommandResponse(requestId, ok, ok ? "rejected" : "db_error");
             return;
         }
 

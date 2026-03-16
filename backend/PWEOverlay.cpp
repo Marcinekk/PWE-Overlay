@@ -2,11 +2,13 @@
 #include <cstdio>
 #include <cctype>
 #include <string>
+#include <shlobj.h>
 #include "Logitech/G27LEDManager.hpp"
 #include "PWEOverlay.hpp"
 #include "PWEWebView.hpp"
 #include "Hooks/Hooks.hpp"
 #include "Internal/PWEOverlayInternal.hpp"
+#include "Storage/DatabaseManager.hpp"
 
 namespace PWE {
     const char* PLUGIN_NAME = "PWEOverlay";
@@ -133,13 +135,23 @@ namespace PWE {
         g_ctx.formattingAPI = g_ctx.loadAPI->formatting;
 
         if (g_ctx.loadAPI->config) g_ctx.configHandle = g_ctx.loadAPI->config->Cfg_GetContext(PLUGIN_NAME);
-        
+
         g_ctx.environmentAPI = g_ctx.loadAPI->environment;
         if (g_ctx.environmentAPI) g_ctx.environmentHandle = g_ctx.environmentAPI->Env_GetContext(PLUGIN_NAME);
 
         RefreshVersionMismatchState();
 
         g27LED.Init();
+
+        {
+            char appData[MAX_PATH] = {};
+            if (SUCCEEDED(SHGetFolderPathA(nullptr, CSIDL_APPDATA, nullptr, 0, appData))) {
+                std::string dbDir = std::string(appData) + "\\PWE-Overlay";
+                CreateDirectoryA(dbDir.c_str(), nullptr);
+                std::string dbPath = dbDir + "\\database.db";
+                PWE::Storage::Init(dbPath.c_str());
+            }
+        }
 
         if (g_ctx.loggerHandle) {
             if (!PWE::IsWebViewOverlayAvailable()) {
@@ -228,6 +240,7 @@ namespace PWE {
         PWE::ShutdownWebViewOverlay();
         Hooks::UnregisterAllHooks();
         g27LED.Shutdown();
+        PWE::Storage::Close();
 
         g_ctx.coreAPI = nullptr;
         g_ctx.loadAPI = nullptr;

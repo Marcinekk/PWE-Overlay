@@ -8,6 +8,7 @@
 namespace PWE::Events {
     namespace {
         std::atomic<int64_t> g_nextIdEvent{1};
+
         void CreateCustomEvent(bool income, int64_t amount, const char* description, const char* type) {
             const int64_t id = g_nextIdEvent++;
 

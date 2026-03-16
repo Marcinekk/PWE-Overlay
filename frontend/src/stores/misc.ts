@@ -16,5 +16,11 @@ export const useMiscStore = defineStore('misc', () => {
         }
     }
 
-    return { miscSettings, update, set };
+    function get(key: string) {
+        if (miscSettings.value.hasOwnProperty(key))
+            return (miscSettings.value as any)[key];
+        return null;
+    }
+
+    return { miscSettings, update, set, get };
 });

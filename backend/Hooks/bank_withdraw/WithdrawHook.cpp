@@ -3,6 +3,7 @@
 #include "../bank_misc/TransactionRvaMapping.hpp"
 #include "../../PWEOverlay.hpp"
 #include "../../Events/Events.hpp"
+#include "../../Storage/DatabaseManager.hpp"
 #include <cstdio>
 #include <cstring>
 #include <intrin.h>
@@ -31,7 +32,9 @@ namespace PWE::Hooks {
             }
 
             if (typeLabel) PWE::Events::SendCustomEvent(false, amount, typeLabel, "bank");
-            if (o_BankWithdraw) o_BankWithdraw(self, unknown, amount, flag);
+
+            PWE::Storage::InsertTransaction(amount, false, typeLabel, "bank");
+            if(!PWE::Storage::isManualTransactionApprove() && o_BankWithdraw) o_BankWithdraw(self, unknown, amount, flag);
         }
     }  // namespace
 

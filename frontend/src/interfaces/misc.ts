@@ -4,6 +4,7 @@ interface MiscSettings {
     frameworkMismatch: boolean;
     webViewFocus: boolean;
     onAction: boolean;
+    isManualTransactionApprove: boolean;
 }
 
 const defaults = {
@@ -12,6 +13,7 @@ const defaults = {
     frameworkMismatch: false,
     webViewFocus: false,
     onAction: false,
+    isManualTransactionApprove: false,
 }
 
 export type { MiscSettings };
