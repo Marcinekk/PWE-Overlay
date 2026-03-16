@@ -2,11 +2,13 @@
 #include <cstdio>
 #include <cctype>
 #include <string>
+#include <shlobj.h>
 #include "Logitech/G27LEDManager.hpp"
 #include "PWEOverlay.hpp"
 #include "PWEWebView.hpp"
 #include "Hooks/Hooks.hpp"
 #include "Internal/PWEOverlayInternal.hpp"
+#include "Storage/DatabaseManager.hpp"
 
 namespace PWE {
     const char* PLUGIN_NAME = "PWEOverlay";
@@ -40,15 +42,6 @@ namespace PWE {
             return false;
         }
 
-        bool NameMatches(const char* actual, const char* needle) {
-            if (!actual || !needle) return false;
-            std::string a(actual);
-            std::string n(needle);
-            for (char& c : a) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-            for (char& c : n) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-            return a.find(n) != std::string::npos;
-        }
-
         void RefreshVersionMismatchState() {
             if (!g_ctx.environmentAPI || !g_ctx.environmentHandle) return;
 
@@ -56,9 +49,12 @@ namespace PWE {
             char gameVersion[64] = {};
             char gameName[128] = {};
 
+            char gameCode[16] = {};
+
             g_ctx.environmentAPI->Env_GetFrameworkVersion(g_ctx.environmentHandle, frameworkVersion, sizeof(frameworkVersion));
             g_ctx.environmentAPI->Env_GetGameVersion(g_ctx.environmentHandle, gameVersion, sizeof(gameVersion));
             g_ctx.environmentAPI->Env_GetGameName(g_ctx.environmentHandle, gameName, sizeof(gameName));
+            g_ctx.environmentAPI->Env_GetGameCode(g_ctx.environmentHandle, gameCode, sizeof(gameCode));
 
             if (frameworkVersion[0]) {
                 std::strncpy(g_ctx.frameworkVersion, frameworkVersion, sizeof(g_ctx.frameworkVersion) - 1);
@@ -79,10 +75,10 @@ namespace PWE {
                 g_ctx.mismatchFrameworkVersion = !VersionCompatible(frameworkVersion, g_ctx.supportedFrameworkVersion);
             }
 
-            if (gameName[0] && gameVersion[0]) {
-                if (NameMatches(gameName, "American Truck Simulator")) {
+            if (gameCode[0] && gameVersion[0]) {
+                if (std::strcmp(gameCode, "ats") == 0) {
                     g_ctx.mismatchGameVersion = !VersionCompatible(gameVersion, g_ctx.supportedATSVersion);
-                } else if (NameMatches(gameName, "Euro Truck Simulator 2")) {
+                } else if (std::strcmp(gameCode, "eut2") == 0) {
                     g_ctx.mismatchGameVersion = !VersionCompatible(gameVersion, g_ctx.supportedETS2Version);
                 } else {
                     g_ctx.mismatchGameVersion = false;
@@ -96,21 +92,25 @@ namespace PWE {
             if (!g_ctx.mismatchFrameworkVersion && !g_ctx.mismatchGameVersion) return;
 
             char msg[512] = {};
-            std::snprintf(msg, sizeof(msg),
-                          "PWEOverlay: version mismatch (framework=%s, game=%s, fw=%s, gameVer=%s).",
-                          g_ctx.mismatchFrameworkVersion ? "true" : "false",
-                          g_ctx.mismatchGameVersion ? "true" : "false",
-                          g_ctx.frameworkVersion[0] ? g_ctx.frameworkVersion : "unknown",
-                          g_ctx.gameVersion[0] ? g_ctx.gameVersion : "unknown");
-            g_ctx.loadAPI->logger->Log(g_ctx.loggerHandle, SPF_LOG_WARN, msg);
+            if (g_ctx.formattingAPI) {
+                g_ctx.formattingAPI->Fmt_Format(msg, sizeof(msg),
+                              "PWEOverlay: version mismatch (framework=%s, game=%s, fw=%s, gameVer=%s).",
+                              g_ctx.mismatchFrameworkVersion ? "true" : "false",
+                              g_ctx.mismatchGameVersion ? "true" : "false",
+                              g_ctx.frameworkVersion[0] ? g_ctx.frameworkVersion : "unknown",
+                              g_ctx.gameVersion[0] ? g_ctx.gameVersion : "unknown");
+                g_ctx.loadAPI->logger->Log(g_ctx.loggerHandle, SPF_LOG_WARN, msg);
+            }
             g_versionMismatchLogged = true;
         }
     }  // namespace
 
     void BuildManifest(SPF_Manifest_Builder_Handle* h, const SPF_Manifest_Builder_API* api) {
         api->Info_SetName(h, PLUGIN_NAME);
-        api->Info_SetVersion(h, "1.1");
-        api->Info_SetAuthor(h, "PWE Overlay");
+        api->Info_SetVersion(h, "1.2");
+        api->Info_SetAuthor(h, "PWE");
+        api->Info_SetGithubUrl(h, "https://github.com/Marcinekk/PWE-Overlay");
+        api->Info_SetWebsiteUrl(h, "https://ko-fi.com/pwe_scripts");
         api->Info_SetMinFrameworkVersion(h, g_ctx.supportedFrameworkVersion);
         api->Info_SetDescriptionLiteral(h, "WebView overlay plugin for SPF.");
 
@@ -135,13 +135,23 @@ namespace PWE {
         g_ctx.formattingAPI = g_ctx.loadAPI->formatting;
 
         if (g_ctx.loadAPI->config) g_ctx.configHandle = g_ctx.loadAPI->config->Cfg_GetContext(PLUGIN_NAME);
-        
+
         g_ctx.environmentAPI = g_ctx.loadAPI->environment;
         if (g_ctx.environmentAPI) g_ctx.environmentHandle = g_ctx.environmentAPI->Env_GetContext(PLUGIN_NAME);
 
         RefreshVersionMismatchState();
 
         g27LED.Init();
+
+        {
+            char appData[MAX_PATH] = {};
+            if (SUCCEEDED(SHGetFolderPathA(nullptr, CSIDL_APPDATA, nullptr, 0, appData))) {
+                std::string dbDir = std::string(appData) + "\\PWE-Overlay";
+                CreateDirectoryA(dbDir.c_str(), nullptr);
+                std::string dbPath = dbDir + "\\database.db";
+                PWE::Storage::Init(dbPath.c_str());
+            }
+        }
 
         if (g_ctx.loggerHandle) {
             if (!PWE::IsWebViewOverlayAvailable()) {
@@ -221,6 +231,8 @@ namespace PWE {
         } else if (g_ctx.showWebView && g_ctx.loggerHandle && g_ctx.loadAPI) {
             g_ctx.loadAPI->logger->LogThrottled(g_ctx.loggerHandle, SPF_LOG_WARN, "PWEOverlay.window_not_found", 2000, "PWEOverlay: game window not found.");
         }
+
+        if (g_ctx.showWebView) Internal::sendMiscData();
     }
 
     void OnUnload() {
@@ -228,6 +240,7 @@ namespace PWE {
         PWE::ShutdownWebViewOverlay();
         Hooks::UnregisterAllHooks();
         g27LED.Shutdown();
+        PWE::Storage::Close();
 
         g_ctx.coreAPI = nullptr;
         g_ctx.loadAPI = nullptr;
@@ -239,13 +252,6 @@ namespace PWE {
         g_ctx.formattingAPI = nullptr;
         g_ctx.uiAPI = nullptr;
         g_ctx.gameWindow = nullptr;
-    }
-
-    void OnSettingChanged(SPF_Config_Handle* config_handle, const char* keyPath) {
-        if (!config_handle || !keyPath) return;
-
-        g_ctx.configHandle = config_handle;
-        if (g_ctx.showWebView) PWE::NavigateWebViewOverlay();
     }
 
     extern "C" {
@@ -262,7 +268,6 @@ namespace PWE {
             exports->OnUnload = OnUnload;
             exports->OnUpdate = OnUpdate;
             exports->OnRegisterUI = OnRegisterUI;
-            exports->OnSettingChanged = OnSettingChanged;
             return true;
         }
     }

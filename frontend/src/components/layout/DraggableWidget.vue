@@ -3,6 +3,7 @@
     import { useDraggable } from '@composables/useDraggable';
     import { useResizable } from '@composables/useResizable';
     import { useWidgetItem } from '@composables/useWidgetItem';
+    import { useMiscStore } from '@stores/misc';
     import { useTelemetryStore } from '@stores/telemetry';
     import { useLayoutStore } from '@stores/layout';
     import type { WidgetId } from '@interfaces/widget';
@@ -11,6 +12,7 @@
     import { faEyeSlash, faSun, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 
     const lay = useLayoutStore();
+    const misc = useMiscStore();
 
     const props = defineProps<{ id: WidgetId }>();
     const { widget, widgetMeta, editMode, widgetStyle, onOpacityChange, layout } = useWidgetItem(props.id);
@@ -27,13 +29,13 @@
 
         const moving = telemetry.data.speed > 1;
         if (typeof meta.when.paused === 'boolean' && telemetry.data.gamePaused !== meta.when.paused) return false;
-        if (typeof meta.when.focus === 'boolean' && telemetry.data.webViewFocus !== meta.when.focus) return false;
+        if (typeof meta.when.focus === 'boolean' && misc.miscSettings.webViewFocus !== meta.when.focus) return false;
         if (typeof meta.when.onJob === 'boolean' && telemetry.data.onJob !== meta.when.onJob) return false;
         if (typeof meta.when.connected === 'boolean' && telemetry.connected !== meta.when.connected) return false;
         if (typeof meta.when.trailerAttached === 'boolean' && telemetry.data.trailerAttached !== meta.when.trailerAttached) return false;
         if (typeof meta.when.engineOn === 'boolean' && telemetry.data.engineOn !== meta.when.engineOn) return false;
         if (typeof meta.when.moving === 'boolean' && moving !== meta.when.moving) return false;
-        if (typeof meta.when.onAction === 'boolean' && telemetry.data.onAction !== meta.when.onAction) return false;
+        if (typeof meta.when.onAction === 'boolean' && misc.miscSettings.onAction !== meta.when.onAction) return false;
         return true;
     });
 

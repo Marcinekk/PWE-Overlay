@@ -12,17 +12,22 @@ export interface PendingEvents {
 
 export const useEventsStore = defineStore('events', () => {
     const eventQueue = ref<PendingEvents[]>([]);
+    const transactionHistory = ref<PendingEvents[]>([]);
 
     function addEvent(event: Omit<PendingEvents, 'timestamp'>) {
-        eventQueue.value.push({
+        const newEvent = {
             ...event,
             timestamp: Date.now(),
-        });
+        };
+        eventQueue.value.push(newEvent);
+        transactionHistory.value.unshift(newEvent);
+
+        if (transactionHistory.value.length > 100) transactionHistory.value.pop();
     }
 
     function removeEvent(id: number) {
         eventQueue.value = eventQueue.value.filter(e => e.id !== id);
     }
 
-    return { eventQueue, addEvent, removeEvent };
+    return { eventQueue, transactionHistory, addEvent, removeEvent };
 });

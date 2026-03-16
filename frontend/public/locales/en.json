@@ -47,6 +47,7 @@
     "pauseMenu2": {
         "paused": "Paused",
         "back": "Back",
+        "error": "Error",
         "editLayout": "Edit layout",
         "finishEdit": "Finish editing",
         "refresh": "Refresh status",
@@ -63,6 +64,7 @@
             "overview": "Overview",
             "truck": "Truck",
             "job": "Job",
+            "transactions": "Transactions",
             "debug": "Debug"
         },
         "overview": {
@@ -72,6 +74,23 @@
             "cruise": "Cruise control",
             "navDistance": "To destination",
             "navTime": "ETA"
+        },
+        "transactions": {
+            "title": "Transaction History",
+            "settings": "Settings",
+            "manualApprove": "Manual approve",
+            "manualApproveDescription": "Approve transactions manually",
+            "truncateTransactions": "Truncate transactions",
+            "truncateTransactionsDescription": "Remove all transactions from database",
+            "filterAll": "All",
+            "filterPending": "Pending",
+            "filterApproved": "Approved",
+            "filterRejected": "Rejected",
+            "empty": "No recent transactions found",
+            "truncateConfirmTitle": "Delete records",
+            "truncateConfirmMessage": "Are you sure you want to delete all transaction records? This action cannot be undone.",
+            "truncateConfirmDelete": "Delete all",
+            "truncateConfirmCancel": "Cancel"
         },
         "warnings": {
             "title": "Status",

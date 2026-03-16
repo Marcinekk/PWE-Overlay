@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(PWEOverlay VERSION 0.1.0 LANGUAGES CXX)
+project(PWEOverlay VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -58,6 +58,8 @@ add_library(PWEOverlay SHARED
     Hooks/bank_withdraw/WithdrawHook.cpp
     Logitech/G27LEDManager.cpp
     PWEWebView.cpp
+    Storage/DatabaseManager.cpp
+    External/sqlite3/sqlite3.c
 )
 
 if(TARGET PWEOverlayFrontend)
@@ -70,6 +72,7 @@ endif()
 target_include_directories(PWEOverlay PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/External/hidapi/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/External/sqlite3"
     "${CMAKE_CURRENT_SOURCE_DIR}/../Framework/include/SPF"
     "${webview2_SOURCE_DIR}/build/native/include"
 )

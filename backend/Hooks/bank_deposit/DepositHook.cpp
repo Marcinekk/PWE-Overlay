@@ -14,11 +14,6 @@ namespace PWE::Hooks {
         BankDepositFn o_BankDeposit = nullptr;
         SPF_Hook_Handle* g_bankDepositHook = nullptr;
 
-        int64_t ReadMoneyFromEconomy(void* economy) {
-            if (!economy) return 0;
-            return *reinterpret_cast<int64_t*>(reinterpret_cast<uintptr_t>(economy) + 0x10);
-        }
-
         void Detour_BankDeposit(void* self, void* unknown, int64_t amount, bool flag) {
             if (self) SetEconomyIfNull(self);
 
@@ -28,9 +23,9 @@ namespace PWE::Hooks {
 
             const char* typeLabel = IdentifyDepositByRva(rva, std::strcmp(g_ctx.gameName, "American Truck Simulator") == 0);
             if (g_ctx.loggerHandle && g_ctx.loadAPI && g_ctx.loadAPI->logger) {
-                if(!typeLabel) {
+                if(!typeLabel && g_ctx.formattingAPI) {
                     char msg[128];
-                    std::snprintf(msg, sizeof(msg), "[BankDeposit] Unknown income (RVA: 0x%llX), amount: %lld", (unsigned long long)rva, (long long)amount);
+                    g_ctx.formattingAPI->Fmt_Format(msg, sizeof(msg), "[BankDeposit] Unknown income (RVA: 0x%llX), amount: %lld", (unsigned long long)rva, (long long)amount);
                     g_ctx.loadAPI->logger->LogThrottled(g_ctx.loggerHandle, SPF_LOG_INFO, "PWEOverlay.bank_deposit", 500, msg);
                 }
             }

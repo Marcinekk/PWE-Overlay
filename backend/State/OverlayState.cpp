@@ -7,7 +7,7 @@
 
 namespace PWE::Internal {
     const char* kDefaultWebViewUrl = "https://pwe.overlay/index.html";
-    const char* kWebViewUrlConfigKey = "settings.webview_url";
+    const char* kWebViewUrlConfigKey = "settings.webview.url";
 
     namespace {
         struct WindowSearchData {

@@ -5,10 +5,6 @@
 #include "../PWEOverlay.hpp"
 
 namespace PWE::Internal {
-    extern const char* kDefaultWebViewUrl;
-    extern const char* kWebViewUrlConfigKey;
-
-    void LoadWebViewUrlFromConfig();
     void ApplyFocusState();
 
     HWND ResolveGameWindow();
@@ -23,7 +19,10 @@ namespace PWE::Internal {
     void PushTelemetryToWebView();
     void UpdateG27LEDs();
     void HandleWebViewMessageJson(const char* jsonMessage);
+    void sendMiscData();
     void ToggleAction();
 
     extern bool isAction;
+
+    std::string JsonEscape(const char* src);
 }

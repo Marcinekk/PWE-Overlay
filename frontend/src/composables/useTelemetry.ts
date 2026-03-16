@@ -4,11 +4,13 @@ import { usePluginBridgeStore } from '@stores/pluginBridge';
 
 import { useEventsStore, type PendingEvents } from '@stores/events';
 import { useMiscStore } from '@stores/misc';
+import { useTransactionsStore } from '@stores/transactions';
 import type { WebViewMessage } from '@interfaces/WebView';
 
 function useTelemetry() {
     const store = useTelemetryStore();
     const miscStore = useMiscStore();
+    const transactionsStore = useTransactionsStore();
     const pluginBridge = usePluginBridgeStore();
     const reconnectTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 
@@ -49,14 +51,34 @@ function useTelemetry() {
 
             case 'misc/versions': {
                 if(!message.payload) return;
-                miscStore.setGameMismatch(message.payload.game_mismatch as boolean);
-                miscStore.setFrameworkMismatch(message.payload.framework_mismatch as boolean);
+                miscStore.set('frameworkMismatch', Boolean(message.payload?.framework_mismatch));
+                miscStore.set('gameMismatch', Boolean(message.payload?.game_mismatch));
                 break;
             }
 
             case 'misc/multiplayer': {
                 if(!message.payload) return;
-                miscStore.setMultiplayer(message.payload.is_multiplayer as boolean);
+                miscStore.set('isMultiplayer', Boolean(message.payload?.is_multiplayer));
+                break;
+            }
+
+            case 'misc/data': {
+                if(!message.payload) return;
+                for (const [key, value] of Object.entries(message.payload)) {
+                    miscStore.set(key, value);
+                }
+                break;
+            }
+
+            case 'transactions/list': {
+                if(!message.payload?.items) return;
+                transactionsStore.setAll(message.payload.items);
+                break;
+            }
+
+            case 'transactions/manual_approve': {
+                if(!message.payload) return;
+                miscStore.set('isManualTransactionApprove', Boolean(message.payload?.approve));
                 break;
             }
         }

@@ -1,30 +1,26 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-
-export interface MiscSettings {
-    isMultiplayer: boolean;
-    gameMismatch: boolean;
-    frameworkMismatch: boolean;
-}
+import { defaults, type MiscSettings } from '@interfaces/misc';
 
 export const useMiscStore = defineStore('misc', () => {
-    const miscSettings = ref<MiscSettings>({
-        isMultiplayer: false,
-        gameMismatch: false,
-        frameworkMismatch: false,
-    });
+    const miscSettings = ref<MiscSettings>(structuredClone(defaults));
 
-    function setMultiplayer(v: boolean) {
-        miscSettings.value.isMultiplayer = v;
+    function set(key: string, value: any) {
+        if (miscSettings.value.hasOwnProperty(key))
+            (miscSettings.value as any)[key] = value;
     }
 
-    function setGameMismatch(v: boolean) {
-        miscSettings.value.gameMismatch = v;
+    function update(payload: Partial<MiscSettings>) {
+        for (const key in payload) {
+            if (payload.hasOwnProperty(key)) (miscSettings.value as any)[key] = payload[key as keyof MiscSettings];
+        }
     }
 
-    function setFrameworkMismatch(v: boolean) {
-        miscSettings.value.frameworkMismatch = v;
+    function get(key: string) {
+        if (miscSettings.value.hasOwnProperty(key))
+            return (miscSettings.value as any)[key];
+        return null;
     }
 
-    return { miscSettings, setMultiplayer, setGameMismatch, setFrameworkMismatch };
+    return { miscSettings, update, set, get };
 });
