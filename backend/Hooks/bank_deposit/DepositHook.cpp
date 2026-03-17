@@ -7,7 +7,7 @@
 #include <cstring>
 #include <intrin.h>
 
-namespace PWE::Hooks {
+namespace PWE::Hooks::Economy {
     namespace {
         using BankDepositFn = void(__fastcall*)(void* self, void* unknown, int64_t amount, bool flag);
 
@@ -15,13 +15,11 @@ namespace PWE::Hooks {
         SPF_Hook_Handle* g_bankDepositHook = nullptr;
 
         void Detour_BankDeposit(void* self, void* unknown, int64_t amount, bool flag) {
-            if (self) SetEconomyIfNull(self);
-
             uintptr_t caller = reinterpret_cast<uintptr_t>(_ReturnAddress());
             uintptr_t base = reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr));
             uintptr_t rva = caller - base;
 
-            const char* typeLabel = IdentifyDepositByRva(rva, std::strcmp(g_ctx.gameName, "American Truck Simulator") == 0);
+            const char* typeLabel = Economy::IdentifyDepositByRva(rva, std::strcmp(g_ctx.gameName, "American Truck Simulator") == 0);
             if (g_ctx.loggerHandle && g_ctx.loadAPI && g_ctx.loadAPI->logger) {
                 if(!typeLabel && g_ctx.formattingAPI) {
                     char msg[128];
@@ -36,13 +34,13 @@ namespace PWE::Hooks {
     }  // namespace
 
     void AddMoney(int64_t amount) {
-        void* economy = GetEconomy();
+        void* economy = Economy::Internal::GetEconomy();
         if (!economy || amount <= 0) return;
         auto* moneyPtr = reinterpret_cast<int64_t*>(reinterpret_cast<uintptr_t>(economy) + 0x10);
         *moneyPtr += amount;
     }
 
-    void RegisterBankDepositHook() {
+    void RegisterDeposit() {
         if (!g_ctx.coreAPI || !g_ctx.coreAPI->hooks) return;
         if (g_bankDepositHook) return;
 
@@ -56,7 +54,7 @@ namespace PWE::Hooks {
         }
     }
 
-    void UnregisterBankDepositHook() {
+    void UnregisterDeposit() {
         g_bankDepositHook = nullptr;
         o_BankDeposit = nullptr;
     }

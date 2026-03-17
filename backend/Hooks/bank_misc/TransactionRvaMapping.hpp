@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace PWE::Hooks {
+namespace PWE::Hooks::Economy {
     struct RvaMappingWithdraw {
         uintptr_t rva;
         const char* label;

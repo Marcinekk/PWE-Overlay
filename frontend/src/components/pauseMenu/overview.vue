@@ -7,7 +7,7 @@
 
     import { i18n, setLocale } from '../../i18n';
     import { Locale } from '@composables/useLanguage';
-    import { faGaugeHigh, faCircleExclamation, faWrench, faLanguage, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+    import { faGaugeHigh, faCircleExclamation, faWrench, faLanguage, faTriangleExclamation, faRoute } from '@fortawesome/free-solid-svg-icons';
 
     import type { SupportedLocale } from '../../i18n';
     import type { TelemetryData } from '@interfaces/telemetry';
@@ -129,20 +129,36 @@
             </div>
         </div>
 
-        <div class="pm2__card hud-glass pm2__card--wide">
+        <div class="pm2__card hud-glass">
+            <div class="pm2__card-head">
+                <FontAwesomeIcon :icon="faRoute" />
+                <span>{{ Locale('pauseMenu2.overview.job') }}</span>
+            </div>
+            <div class="pm2__kv pm2__kv--cols">
+                <div><span>{{ Locale('pauseMenu2.overview.cargo') }}</span><strong>{{ telemetry.jobCargoName || '--' }}</strong></div>
+                <div><span>{{ Locale('pauseMenu2.overview.from') }}</span><strong>{{ telemetry.jobSourceCity || '--' }}</strong></div>
+                <div><span>{{ Locale('pauseMenu2.overview.to') }}</span><strong>{{ telemetry.jobDestinationCity || '--' }}</strong></div>
+                <div><span>{{ Locale('pauseMenu2.overview.remaining') }}</span><strong>{{ formatDuration(telemetry.jobRemainingTime) }}</strong></div>
+                <div><span>{{ Locale('pauseMenu2.overview.distanceRemaining') }}</span><strong>{{ formatDistance(telemetry.jobDistanceRemaining) }}</strong></div>
+                <div><span>{{ Locale('pauseMenu2.overview.income') }}</span><strong>{{ Math.round(telemetry.jobIncome).toLocaleString() }}</strong></div>
+            </div>
+        </div>
+
+        <div class="pm2__card hud-glass">
             <div class="pm2__card-head">
                 <FontAwesomeIcon :icon="faWrench" />
                 <span>{{ Locale('pauseMenu2.actions.title') }}</span>
             </div>
+
             <div class="flex flex-wrap gap-2.5">
                 <button class="pm2__btn pm2__btn--ghost animate__animated animate__fadeInUp animate__faster" style="animation-delay: 35ms" @click="toggleEditMode">
                     <FontAwesomeIcon :icon="faWrench" />
                     <span>{{ layout.editMode ? Locale('pauseMenu2.finishEdit') : Locale('pauseMenu2.editLayout') }}</span>
                 </button>
             </div>
-        </div>
 
-        <div class="pm2__card hud-glass pm2__card--wide">
+            <div class="pm2__nav-divider" />
+
             <div class="pm2__lang">
                 <div class="pm2__lang-head">
                     <div class="pm2__lang-title">
@@ -163,6 +179,7 @@
                         <span class="pm2__flag">🇺🇸</span>
                         <span class="pm2__lang-label">{{ Locale('settings.language.english') }}</span>
                     </button>
+
                     <button
                         class="pm2__lang-btn"
                         style="animation-delay: 35ms"
@@ -173,6 +190,7 @@
                         <span class="pm2__flag">🇵🇱</span>
                         <span class="pm2__lang-label">{{ Locale('settings.language.polish') }}</span>
                     </button>
+
                     <button
                         class="pm2__lang-btn pm2__lang-btn--auto"
                         style="animation-delay: 70ms"

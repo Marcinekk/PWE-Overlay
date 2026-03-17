@@ -40,7 +40,6 @@ function useDescriptions() {
 
     const types = [
         { name: 'bank', label: Locale('widgets.alerts.bank'), },
-        { name: 'xp', label: Locale('widgets.alerts.xp'), },
     ];
 
     function getLabel(name: any) {

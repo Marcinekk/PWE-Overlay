@@ -5,17 +5,18 @@
 #include "bank_economy/BootstrapHook.hpp"
 #include "bank_economy/Context.hpp"
 
+
 namespace PWE::Hooks {
     void RegisterAllHooks() {
-        RegisterEconomyBootstrapHook();
-        RegisterBankDepositHook();
-        RegisterBankWithdrawHook();
+        Economy::Internal::Register();
+        Economy::RegisterDeposit();
+        Economy::RegisterWithdraw();
     }
 
     void UnregisterAllHooks() {
-        UnregisterEconomyBootstrapHook();
-        UnregisterBankDepositHook();
-        UnregisterBankWithdrawHook();
-        ClearEconomy();
+        Economy::UnregisterDeposit();
+        Economy::UnregisterWithdraw();
+        Economy::Internal::Unregister();
+        Economy::Internal::ClearEconomy();
     }
 }  // namespace PWE::Hooks

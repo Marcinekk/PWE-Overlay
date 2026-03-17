@@ -1,5 +1,5 @@
 #pragma once
-//
+
 #include <windows.h>
 #include <SPF_API/SPF_Plugin.h>
 #include <SPF_API/SPF_Manifest_API.h>
@@ -11,7 +11,9 @@
 #include <SPF_API/SPF_Environment_API.h>
 #include <SPF_API/SPF_Telemetry_API.h>
 #include <SPF_API/SPF_GameConsole_API.h>
-//
+
+#include "External/sqlite3/sqlite3.h"
+
 namespace PWE {
     struct PluginContext {
         PluginContext() {
@@ -19,6 +21,8 @@ namespace PWE {
             supportedATSVersion = "1.58.1.4";
             supportedETS2Version = "1.58.1.4";
         }
+
+        sqlite3* db = nullptr;
 
         const SPF_Load_API* loadAPI = nullptr;
         const SPF_Core_API* coreAPI = nullptr;
@@ -35,9 +39,11 @@ namespace PWE {
 
         HWND gameWindow = nullptr;
 
+        char gameCode[16] = { 0 };
         char frameworkVersion[64] = { 0 };
         char gameVersion[64] = { 0 };
         char gameName[128] = { 0 };
+        char profileName[128] = { 0 };
 
         const char* supportedFrameworkVersion;
         const char* supportedATSVersion;

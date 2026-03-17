@@ -5,6 +5,7 @@ import { usePluginBridgeStore } from '@stores/pluginBridge';
 import { useEventsStore, type PendingEvents } from '@stores/events';
 import { useMiscStore } from '@stores/misc';
 import { useTransactionsStore } from '@stores/transactions';
+import { useLogbookStore } from '@stores/logbook';
 import type { WebViewMessage } from '@interfaces/WebView';
 
 function useTelemetry() {
@@ -79,6 +80,12 @@ function useTelemetry() {
             case 'transactions/manual_approve': {
                 if(!message.payload) return;
                 miscStore.set('isManualTransactionApprove', Boolean(message.payload?.approve));
+                break;
+            }
+
+            case 'logbook/list': {
+                if(!message.payload?.items) return;
+                useLogbookStore().setAll(message.payload.items);
                 break;
             }
         }

@@ -1,8 +1,8 @@
 #pragma once
 #include <cstdint>
 
-namespace PWE::Hooks {
-    void RegisterBankDepositHook();
-    void UnregisterBankDepositHook();
+namespace PWE::Hooks::Economy {
+    void RegisterDeposit();
+    void UnregisterDeposit();
     void AddMoney(int64_t amount);
 }

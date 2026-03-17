@@ -3,12 +3,12 @@
 #include "../bank_misc/TransactionRvaMapping.hpp"
 #include "../../PWEOverlay.hpp"
 #include "../../Events/Events.hpp"
-#include "../../Storage/DatabaseManager.hpp"
+#include "../../Storage/Transactions/Transactions.hpp"
 #include <cstdio>
 #include <cstring>
 #include <intrin.h>
 
-namespace PWE::Hooks {
+namespace PWE::Hooks::Economy {
     namespace {
         using BankWithdrawFn = void(__fastcall*)(void* self, void* unknown, int64_t amount, bool flag);
 
@@ -16,13 +16,11 @@ namespace PWE::Hooks {
         SPF_Hook_Handle* g_bankWithdrawHook = nullptr;
 
         void Detour_BankWithdraw(void* self, void* unknown, int64_t amount, bool flag) {
-            if (self) SetEconomyIfNull(self);
-
             uintptr_t caller = reinterpret_cast<uintptr_t>(_ReturnAddress());
             uintptr_t base = reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr));
             uintptr_t rva = caller - base;
 
-            const char* typeLabel = IdentifyWithdrawByRva(rva, std::strcmp(g_ctx.gameName, "American Truck Simulator") == 0);
+            const char* typeLabel = Economy::IdentifyWithdrawByRva(rva, std::strcmp(g_ctx.gameName, "American Truck Simulator") == 0);
             if (g_ctx.loggerHandle && g_ctx.loadAPI && g_ctx.loadAPI->logger) {
                 if(!typeLabel && g_ctx.formattingAPI) {
                     char msg[128];
@@ -33,26 +31,26 @@ namespace PWE::Hooks {
 
             if (typeLabel) PWE::Events::SendCustomEvent(false, amount, typeLabel, "bank");
 
-            PWE::Storage::InsertTransaction(amount, false, typeLabel, "bank");
-            if(!PWE::Storage::isManualTransactionApprove() && o_BankWithdraw) o_BankWithdraw(self, unknown, amount, flag);
+            PWE::Storage::Transactions::Insert(amount, false, typeLabel, "bank");
+            if(!PWE::Storage::Transactions::isManual() && o_BankWithdraw) o_BankWithdraw(self, unknown, amount, flag);
         }
     }  // namespace
 
     int64_t GetMoney() {
-        void* economy = GetEconomy();
+        void* economy = Economy::Internal::GetEconomy();
         if (!economy) return 0;
         return *reinterpret_cast<int64_t*>(reinterpret_cast<uintptr_t>(economy) + 0x10);
     }
 
     void RemoveMoney(int64_t amount) {
-        void* economy = GetEconomy();
+        void* economy = Economy::Internal::GetEconomy();
         if (!economy || amount <= 0) return;
         auto* moneyPtr = reinterpret_cast<int64_t*>(reinterpret_cast<uintptr_t>(economy) + 0x10);
         if (*moneyPtr <= amount) *moneyPtr = 0;
         else *moneyPtr -= amount;
     }
 
-    void RegisterBankWithdrawHook() {
+    void RegisterWithdraw() {
         if (!g_ctx.coreAPI || !g_ctx.coreAPI->hooks) return;
         if (g_bankWithdrawHook) return;
 
@@ -66,7 +64,7 @@ namespace PWE::Hooks {
         }
     }
 
-    void UnregisterBankWithdrawHook() {
+    void UnregisterWithdraw() {
         g_bankWithdrawHook = nullptr;
         o_BankWithdraw = nullptr;
     }
