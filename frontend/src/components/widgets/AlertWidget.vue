@@ -2,11 +2,13 @@
     import { ref, watch, onMounted } from 'vue';
     import { useEventsStore, type PendingEvents } from '@stores/events';
     import { useLayoutStore } from '@stores/layout';
+    import { useTelemetryStore } from '@stores/telemetry';
     import { faWallet, faArrowTrendUp, faArrowTrendDown, faCircleInfo, faGasPump, faWrench, faTruck, faWarehouse, faCoins, faReceipt } from '@fortawesome/free-solid-svg-icons';
     import { useDescriptions } from '@composables/useDescriptions';
 
     const layout = useLayoutStore();
     const eventsStore = useEventsStore();
+    const telemetry = useTelemetryStore();
     const currentEvent = ref<PendingEvents | null>(null);
     const { descriptions, getLabel, getType } = useDescriptions();
     const visible = ref(false);
@@ -165,7 +167,7 @@
                             class="text-lg font-black font-mono tracking-tight"
                             :class="getColorClass(currentEvent, 'text')"
                         >
-                            {{ getColorClass(currentEvent, 'textAlt') }}{{ (currentEvent?.amount || 0).toLocaleString() }}$
+                            {{ getColorClass(currentEvent, 'textAlt') }}{{ (currentEvent?.amount || 0).toLocaleString() }}{{ telemetry?.data?.gameName === 'ATS' ? '$' : '€' }}
                         </div>
                     </div>
                     

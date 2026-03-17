@@ -127,7 +127,7 @@ namespace PWE::Internal {
         ss << R"(,"rotationX":)" << truckData.world_placement.orientation.heading;
         ss << R"(,"rotationY":)" << truckData.world_placement.orientation.pitch;
         ss << R"(,"rotationZ":)" << truckData.world_placement.orientation.roll;
-        ss << R"(,"money":)" << PWE::Hooks::GetMoney();
+        ss << R"(,"money":)" << PWE::Hooks::Economy::GetMoney();
         ss << "}}";
         return ss.str();
     }

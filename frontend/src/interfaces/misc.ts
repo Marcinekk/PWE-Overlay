@@ -5,6 +5,8 @@ interface MiscSettings {
     webViewFocus: boolean;
     onAction: boolean;
     isManualTransactionApprove: boolean;
+    profileName: string;
+    gameName: string;
 }
 
 const defaults = {
@@ -14,6 +16,8 @@ const defaults = {
     webViewFocus: false,
     onAction: false,
     isManualTransactionApprove: false,
+    profileName: '',
+    gameName: '',
 }
 
 export type { MiscSettings };

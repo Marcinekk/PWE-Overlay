@@ -5,6 +5,8 @@
 #include <atomic>
 #include <sstream>
 
+#include "job/job_event.hpp"
+
 namespace PWE::Events {
     namespace {
         std::atomic<int64_t> g_nextIdEvent{1};
@@ -29,5 +31,13 @@ namespace PWE::Events {
 
     void SendCustomEvent(bool income, int64_t amount, const char* description, const char* type) {
         CreateCustomEvent(income, amount, description, type);
+    }
+
+    void RegisterEvents() {
+        PWE::Events::Job::Register();
+    }
+
+    void UnregisterEvents() {
+        PWE::Events::Job::Unregister();
     }
 }  // namespace PWE::Events

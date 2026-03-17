@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace PWE::Hooks {
+namespace PWE::Hooks::Economy::Internal {
     namespace {
         void* g_economy = nullptr;
 

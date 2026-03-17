@@ -6,7 +6,7 @@
 #include "../../PWEOverlay.hpp"
 #include "Context.hpp"
 
-namespace PWE::Hooks {
+namespace PWE::Hooks::Economy::Internal {
     namespace {
         using EconomyCreateFn = void*(__fastcall*)(void* owner);
         using EconomyGetterFn = void*(__fastcall*)(void* self);
@@ -35,20 +35,17 @@ namespace PWE::Hooks {
         }
 
         void* Detour_EconomyGetter(void* self) {
-            void* returned = o_EconomyGetter ? o_EconomyGetter(self) : nullptr;
-
             void* economy = nullptr;
             if (IsLikelyValidPointer(self)) {
-                auto* level0 = *reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(self) + 0xC8);
-                if (IsLikelyValidPointer(level0)) economy = *reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(level0) + 0x10);
+                auto* level0 = *reinterpret_cast<void**>((uintptr_t)self + 0xC8);
+                if (IsLikelyValidPointer(level0)) economy = *reinterpret_cast<void**>((uintptr_t)level0 + 0x10);
             }
-
             TryCaptureEconomy("getter", economy, self);
-            return returned;
+            return o_EconomyGetter ? o_EconomyGetter(self) : nullptr;
         }
     }  // namespace
 
-    void RegisterEconomyBootstrapHook() {
+    void Register() {
         if (!g_ctx.coreAPI || !g_ctx.coreAPI->hooks) return;
         if (g_economyBootstrapHook && g_economyGetterHook) return;
 
@@ -73,7 +70,7 @@ namespace PWE::Hooks {
         }
     }
 
-    void UnregisterEconomyBootstrapHook() {
+    void Unregister() {
         g_economyBootstrapHook = nullptr;
         g_economyGetterHook = nullptr;
         o_EconomyCreate = nullptr;

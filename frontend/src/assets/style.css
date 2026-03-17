@@ -361,19 +361,15 @@ html, body {
 
 .pm2__grid {
     display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-columns: repeat(12, 1fr);
     gap: 12px;
     padding-bottom: 12px;
 }
 
 .pm2__card {
-    grid-column: span 12;
+    grid-column: span 6;
     border-radius: 16px;
     padding: 14px;
-    box-shadow:
-        0 0 0 1px rgba(255,255,255,0.02),
-        0 14px 32px rgba(0,0,0,0.52),
-        inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 .pm2__card--wide {
@@ -570,10 +566,13 @@ html, body {
     color: rgba(255, 170, 170, 0.95);
 }
 
-@media (min-width: 900px) {
-    .pm2__card:nth-child(1) { grid-column: span 6; }
-    .pm2__card:nth-child(2) { grid-column: span 6; }
-    .pm2__card:nth-child(3) { grid-column: span 12; }
+@media (max-width: 1200px) {
+    .pm2__card { grid-column: span 6; }
+    .pm2__card--wide { grid-column: span 12; }
+}
+
+@media (max-width: 720px) {
+    .pm2__card { grid-column: span 12; }
 }
 
 @media (max-width: 720px) {

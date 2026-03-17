@@ -8,6 +8,7 @@
 #include "PWEWebView.hpp"
 #include "Hooks/Hooks.hpp"
 #include "Internal/PWEOverlayInternal.hpp"
+#include "Events/Events.hpp"
 #include "Storage/DatabaseManager.hpp"
 
 namespace PWE {
@@ -55,6 +56,11 @@ namespace PWE {
             g_ctx.environmentAPI->Env_GetGameVersion(g_ctx.environmentHandle, gameVersion, sizeof(gameVersion));
             g_ctx.environmentAPI->Env_GetGameName(g_ctx.environmentHandle, gameName, sizeof(gameName));
             g_ctx.environmentAPI->Env_GetGameCode(g_ctx.environmentHandle, gameCode, sizeof(gameCode));
+
+            if (gameCode[0]) {
+                std::strncpy(g_ctx.gameCode, gameCode, sizeof(g_ctx.gameCode) - 1);
+                g_ctx.gameCode[sizeof(g_ctx.gameCode) - 1] = '\0';
+            }
 
             if (frameworkVersion[0]) {
                 std::strncpy(g_ctx.frameworkVersion, frameworkVersion, sizeof(g_ctx.frameworkVersion) - 1);
@@ -107,7 +113,7 @@ namespace PWE {
 
     void BuildManifest(SPF_Manifest_Builder_Handle* h, const SPF_Manifest_Builder_API* api) {
         api->Info_SetName(h, PLUGIN_NAME);
-        api->Info_SetVersion(h, "1.2");
+        api->Info_SetVersion(h, "1.3");
         api->Info_SetAuthor(h, "PWE");
         api->Info_SetGithubUrl(h, "https://github.com/Marcinekk/PWE-Overlay");
         api->Info_SetWebsiteUrl(h, "https://ko-fi.com/pwe_scripts");
@@ -187,6 +193,10 @@ namespace PWE {
         g_ctx.uiAPI = ui_api;
     }
 
+    void OnGameWorldReady() {
+        Events::RegisterEvents();
+    }
+
     void OnUpdate() {
         static bool lastRequestedVisibleSet = false;
         static bool lastRequestedVisible = false;
@@ -195,15 +205,34 @@ namespace PWE {
         Internal::ProcessHotkeys();
         Internal::UpdateG27LEDs();
 
-        if (!versionsChecked && g_ctx.environmentAPI && g_ctx.environmentHandle) {
-            RefreshVersionMismatchState();
-            LogMismatchOnceIfNeeded();
-            versionsChecked = true;
+        if (g_ctx.environmentAPI && g_ctx.environmentHandle) {
+            if (!versionsChecked) {
+                RefreshVersionMismatchState();
+                LogMismatchOnceIfNeeded();
+                versionsChecked = true;
+            }
+
+            char buffer[512] = {};
+
+            g_ctx.environmentAPI->Env_GetActiveProfileName(g_ctx.environmentHandle, buffer, sizeof(buffer));
+            if (buffer[0] && std::strcmp(buffer, g_ctx.profileName) != 0) {
+                std::strncpy(g_ctx.profileName, buffer, sizeof(g_ctx.profileName) - 1);
+                g_ctx.profileName[sizeof(g_ctx.profileName) - 1] = '\0';
+            }
+
+            g_ctx.environmentAPI->Env_GetGameName(g_ctx.environmentHandle, buffer, sizeof(buffer));
+            if (buffer[0] && std::strcmp(buffer, g_ctx.gameName) != 0) {
+                std::strncpy(g_ctx.gameName, buffer, sizeof(g_ctx.gameName) - 1);
+                g_ctx.gameName[sizeof(g_ctx.gameName) - 1] = '\0';
+            }
+
+            if (g_ctx.environmentAPI->Env_GetMultiplayerStatus(g_ctx.environmentHandle, buffer, sizeof(buffer))) {
+                const bool isMp = (buffer[0] != '\0' && std::strcmp(buffer, "None") != 0);
+                if (isMp != g_ctx.isMultiplayer) g_ctx.isMultiplayer = isMp;
+            }
         }
 
-        char mpStatus[32]{};
-        const bool multiplayerStatus = g_ctx.environmentAPI->Env_GetMultiplayerStatus(g_ctx.environmentHandle, mpStatus, sizeof(mpStatus));
-        if (multiplayerStatus != g_ctx.isMultiplayer) g_ctx.isMultiplayer = (std::string(mpStatus) != "None");
+        if (g_ctx.showWebView) Internal::sendMiscData();
 
         if (!PWE::IsWebViewOverlayAvailable()) {
             if (!g_ctx.webViewUnavailableLogged && g_ctx.showWebView && g_ctx.loggerHandle && g_ctx.loadAPI) {
@@ -231,14 +260,15 @@ namespace PWE {
         } else if (g_ctx.showWebView && g_ctx.loggerHandle && g_ctx.loadAPI) {
             g_ctx.loadAPI->logger->LogThrottled(g_ctx.loggerHandle, SPF_LOG_WARN, "PWEOverlay.window_not_found", 2000, "PWEOverlay: game window not found.");
         }
-
-        if (g_ctx.showWebView) Internal::sendMiscData();
     }
 
     void OnUnload() {
         PWE::SetWebViewOverlayMessageCallback(nullptr);
         PWE::ShutdownWebViewOverlay();
+
         Hooks::UnregisterAllHooks();
+        Events::UnregisterEvents();
+
         g27LED.Shutdown();
         PWE::Storage::Close();
 
@@ -268,6 +298,7 @@ namespace PWE {
             exports->OnUnload = OnUnload;
             exports->OnUpdate = OnUpdate;
             exports->OnRegisterUI = OnRegisterUI;
+            exports->OnGameWorldReady = OnGameWorldReady;
             return true;
         }
     }

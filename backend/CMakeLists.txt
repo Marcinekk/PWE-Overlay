@@ -51,6 +51,7 @@ add_library(PWEOverlay SHARED
     Telemetry/TelemetryPublisher.cpp
     Internal/WebViewCommandBridge.cpp
     Events/Events.cpp
+    Events/job/job_event.cpp
     Hooks/Hooks.cpp
     Hooks/bank_economy/BootstrapHook.cpp
     Hooks/bank_economy/Context.cpp
@@ -59,6 +60,9 @@ add_library(PWEOverlay SHARED
     Logitech/G27LEDManager.cpp
     PWEWebView.cpp
     Storage/DatabaseManager.cpp
+    Storage/Transactions/Transactions.cpp
+    Storage/Jobs/Jobs.cpp
+    Storage/Misc/Misc.cpp
     External/sqlite3/sqlite3.c
 )
 

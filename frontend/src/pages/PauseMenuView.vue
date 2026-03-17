@@ -12,7 +12,7 @@
 
     import OverviewPage from '@components/pauseMenu/overview.vue';
     import TruckPage from '@components/pauseMenu/truck.vue';
-    import JobPage from '@components/pauseMenu/job.vue';
+    import LogbookPage from '@components/pauseMenu/logBook.vue';
     import TransactionsPage from '@components/pauseMenu/transactions.vue';
     import DebugPage from '@components/pauseMenu/debug.vue';
 
@@ -20,15 +20,15 @@
         faArrowLeft,
         faGaugeHigh,
         faTruck,
-        faSuitcase,
         faBug,
         faWrench,
         faPlugCircleBolt,
-        faTriangleExclamation,
-        faWallet
+        faCircleInfo,
+        faWallet,
+        faBook
     } from '@fortawesome/free-solid-svg-icons';
 
-    type TabId = 'overview' | 'truck' | 'job' | 'transactions' | 'debug';
+    type TabId = 'overview' | 'truck' | 'logbook' | 'transactions' | 'debug';
 
     const router = useRouter();
     const telemetry = useTelemetryStore();
@@ -68,7 +68,7 @@
     const tabs = computed(() => ([
         { id: 'overview' as const, label: Locale('pauseMenu2.tabs.overview'), icon: faGaugeHigh },
         { id: 'truck' as const, label: Locale('pauseMenu2.tabs.truck'), icon: faTruck },
-        { id: 'job' as const, label: Locale('pauseMenu2.tabs.job'), icon: faSuitcase },
+        { id: 'logbook' as const, label: Locale('pauseMenu2.tabs.logbook'), icon: faBook },
         { id: 'transactions' as const, label: Locale('pauseMenu2.tabs.transactions'), icon: faWallet },
         { id: 'debug' as const, label: Locale('pauseMenu2.tabs.debug'), icon: faBug },
     ]));
@@ -121,7 +121,7 @@
                                 <span>{{ telemetry.connected ? Locale('settings.sdk.connected') : Locale('settings.sdk.disconnected') }}</span>
                             </span>
                             <span class="pm2__badge" v-if="misc.miscSettings.isMultiplayer">
-                                <FontAwesomeIcon :icon="faTriangleExclamation" />
+                                <FontAwesomeIcon :icon="faCircleInfo" />
                                 <span>{{ Locale('pauseMenu2.multiplayer') }}</span>
                             </span>
                         </div>
@@ -134,6 +134,9 @@
                             <span class="pm2__sep">•</span>
                             <span class="hud-text-muted">{{ Locale('pauseMenu2.speed') }}:</span>
                             <strong class="hud-text">{{ speedDisplay }} {{ speedUnitLabel }}</strong>
+                            <span class="pm2__sep">•</span>
+                            <span class="hud-text-muted">{{ Locale('pauseMenu2.game') }}:</span>
+                            <strong class="hud-text">{{ telemetry.data.gameName || '?' }}</strong>
                         </div>
                     </div>
                 </div>
@@ -174,7 +177,7 @@
                         <div :key="activeTab">
                             <OverviewPage :active-tab="activeTab" :telemetry="telemetry.data" :connected="telemetry.connected" />
                             <TruckPage :active-tab="activeTab" :telemetry="telemetry.data" :connected="telemetry.connected" />
-                            <JobPage :active-tab="activeTab" :telemetry="telemetry.data" :connected="telemetry.connected" />
+                            <LogbookPage :active-tab="activeTab" :telemetry="telemetry.data" :connected="telemetry.connected" />
                             <TransactionsPage :active-tab="activeTab" :telemetry="telemetry.data" :connected="telemetry.connected" />
                             <DebugPage :active-tab="activeTab" :telemetry="telemetry.data" :connected="telemetry.connected" />
                         </div>

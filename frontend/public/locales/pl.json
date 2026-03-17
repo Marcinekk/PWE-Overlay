@@ -53,6 +53,7 @@
         "refresh": "Odśwież status",
         "multiplayer": "Multiplayer",
         "money": "Pieniądze",
+        "game": "Gra",
         "gear": "Bieg",
         "speed": "Prędkość",
         "language": {
@@ -65,7 +66,21 @@
             "truck": "Ciężarówka",
             "job": "Zlecenie",
             "transactions": "Wydatki i przychody",
-            "debug": "Debug"
+            "debug": "Debug",
+            "logbook": "Dziennik"
+        },
+        "logbook": {
+            "noJobs": "Brak zleceń",
+            "notConnected": "Połącz się z grą, aby zobaczyć dziennik",
+            "income": "Przychód",
+            "distance": "Dystans",
+            "source": "Źródło",
+            "destination": "Cel",
+            "truncate": "Usuń",
+            "truncateConfirmTitle": "Usuwanie wpisów",
+            "truncateConfirmMessage": "Czy na pewno chcesz usunąć wszystkie wpisy dziennika? Tej operacji nie można cofnąć",
+            "truncateConfirmDelete": "Usuń wszystko",
+            "truncateConfirmCancel": "Anuluj"
         },
         "overview": {
             "title": "Trasa",
@@ -73,7 +88,14 @@
             "speedLimit": "Limit",
             "cruise": "Tempomat",
             "navDistance": "Do celu",
-            "navTime": "ETA"
+            "navTime": "ETA",
+            "job": "Zlecenie",
+            "cargo": "Ładunek",
+            "from": "Skąd",
+            "to": "Dokąd",
+            "remaining": "Pozostało",
+            "distanceRemaining": "Dystans",
+            "income": "Zarobek"
         },
         "transactions": {
             "title": "Historia transakcji",
@@ -86,8 +108,8 @@
             "filterApproved": "Zatwierdzone",
             "filterRejected": "Odrzucone",
             "empty": "Brak historii transakcji",
-            "truncateConfirmTitle": "Usuwanie rekordów",
-            "truncateConfirmMessage": "Czy na pewno chcesz usunąć wszystkie rekordy transakcji? Tej operacji nie można cofnąć.",
+            "truncateConfirmTitle": "Usuwanie wpisów",
+            "truncateConfirmMessage": "Czy na pewno chcesz usunąć wszystkie wpisy transakcji? Tej operacji nie można cofnąć",
             "truncateConfirmDelete": "Usuń wszystko",
             "truncateConfirmCancel": "Anuluj"
         },
@@ -115,15 +137,6 @@
             "wheels": "Koła",
             "trailer": "Naczepa"
         },
-        "job": {
-            "title": "Zlecenie",
-            "cargo": "Ładunek",
-            "from": "Skąd",
-            "to": "Dokąd",
-            "remaining": "Pozostało",
-            "distanceRemaining": "Dystans",
-            "income": "Zarobek"
-        },
         "debug": {
             "title": "Debug",
             "bridge": "Mostek pluginu",
@@ -136,7 +149,8 @@
             "off": "WYŁ",
             "devTools": "Narzędzia dev",
             "addMoney": "Dodaj pieniądze",
-            "removeMoney": "Usuń pieniądze"
+            "removeMoney": "Usuń pieniądze",
+            "money": "Pieniądze"
         }
     },
     "widgets": {
@@ -172,8 +186,7 @@
             "player_tollgate_paid": "Płatna autostrada",
             "player_ferry_paid": "Transport promem",
             "player_train_paid": "Transport kolejowy",
-            "bank": "Bank",
-            "xp": "Doświadczenie"
+            "bank": "Bank"
         },
         "fuel": {
             "name": "Paliwo",

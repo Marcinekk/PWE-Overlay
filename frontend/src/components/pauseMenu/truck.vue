@@ -13,7 +13,7 @@
 
 <template>
     <section v-show="activeTab === 'truck'" key="truck" class="pm2__grid">
-        <div class="pm2__card hud-glass pm2__card--wide">
+        <div class="pm2__card hud-glass">
             <div class="pm2__card-head">
                 <FontAwesomeIcon :icon="faTruck" />
                 <span>{{ Locale('pauseMenu2.truck.title') }}</span>

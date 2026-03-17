@@ -10,7 +10,10 @@
 #include "../PWEWebView.hpp"
 #include "../Hooks/bank_deposit/DepositHook.hpp"
 #include "../Hooks/bank_withdraw/WithdrawHook.hpp"
-#include "../Storage/DatabaseManager.hpp"
+#include "../Events/job/job_event.hpp"
+#include "../Storage/Transactions/Transactions.hpp"
+#include "../Storage/Jobs/Jobs.hpp"
+
 
 namespace PWE::Internal {
     bool isAction = false;
@@ -103,7 +106,7 @@ namespace PWE::Internal {
         }
 
         void SendCommandResponse(const std::string& requestId, bool ok, const char* message) {
-            const int64_t balance = PWE::Hooks::GetMoney();
+            const int64_t balance = PWE::Hooks::Economy::GetMoney();
             char response[512] = {};
             std::snprintf(response, sizeof(response),
                           R"({"type":"plugin/response","payload":{"requestId":"%s","ok":%s,"message":"%s","balance":%lld}})",
@@ -138,11 +141,15 @@ namespace PWE::Internal {
                 "type":"misc/data",
                 "payload":{
                     "onAction":%s,
-                    "webViewFocus":%s
+                    "webViewFocus":%s,
+                    "profileName":%s,
+                    "gameName":%s
                 }
             })",
             isAction ? "true" : "false",
-            g_ctx.webViewFocus ? "true" : "false"
+            g_ctx.webViewFocus ? "true" : "false",
+            g_ctx.profileName,
+            JsonEscape(g_ctx.gameName).c_str()
         );
         PWE::PostWebViewOverlayMessageJson(response);
     }
@@ -167,7 +174,7 @@ namespace PWE::Internal {
                 SendCommandResponse(requestId, false, "amount_must_be_positive");
                 return;
             }
-            PWE::Hooks::AddMoney(amount);
+            PWE::Hooks::Economy::AddMoney(amount);
             SendCommandResponse(requestId, true, "money_added");
             return;
         }
@@ -177,7 +184,7 @@ namespace PWE::Internal {
                 SendCommandResponse(requestId, false, "amount_must_be_positive");
                 return;
             }
-            PWE::Hooks::RemoveMoney(amount);
+            PWE::Hooks::Economy::RemoveMoney(amount);
             SendCommandResponse(requestId, true, "money_removed");
             return;
         }
@@ -214,7 +221,7 @@ namespace PWE::Internal {
             int64_t limit = 100;
             ExtractInt64Value(json, "limit", limit);
 
-            const std::string arr = PWE::Storage::QueryTransactionsJson(
+            const std::string arr = PWE::Storage::Transactions::QueryJson(
                 statusFilter.empty() ? nullptr : statusFilter.c_str(),
                 static_cast<int>(limit));
 
@@ -229,7 +236,7 @@ namespace PWE::Internal {
         }
 
         if (command == "transactions/truncate") {
-            PWE::Storage::ClearTransactions();
+            PWE::Storage::Transactions::Clear();
             SendCommandResponse(requestId, true, "transactions_truncated");
             return;
         }
@@ -240,13 +247,13 @@ namespace PWE::Internal {
                 SendCommandResponse(requestId, false, "missing_approve");
                 return;
             }
-            PWE::Storage::SetManualTransactionApprove(approve);
+            PWE::Storage::Transactions::SetManual(approve);
             SendCommandResponse(requestId, true, "manual_approve_set");
             return;
         }
 
         if (command == "transactions/get_manual_approve") {
-            const bool approve = PWE::Storage::isManualTransactionApprove();
+            const bool approve = PWE::Storage::Transactions::isManual();
             char response[256] = {};
             std::snprintf(response, sizeof(response),
                 R"({"type":"transactions/manual_approve","payload":{"requestId":"%s","approve":%s}})",
@@ -263,12 +270,12 @@ namespace PWE::Internal {
                 return;
             }
 
-            const bool ok = PWE::Storage::SetStatus(id, "approved");
+            const bool ok = PWE::Storage::Transactions::SetStatus(id, "approved");
             SendCommandResponse(requestId, ok, ok ? "approved" : "db_error");
 
             if (ok) {
-                const int64_t amount = PWE::Storage::GetTransactionAmount(id);
-                if (amount > 0) PWE::Hooks::RemoveMoney(amount);
+                const int64_t amount = PWE::Storage::Transactions::GetAmount(id);
+                if (amount > 0) PWE::Hooks::Economy::RemoveMoney(amount);
             }
 
             return;
@@ -281,8 +288,30 @@ namespace PWE::Internal {
                 return;
             }
 
-            const bool ok = PWE::Storage::SetStatus(id, "rejected");
+            const bool ok = PWE::Storage::Transactions::SetStatus(id, "rejected");
             SendCommandResponse(requestId, ok, ok ? "rejected" : "db_error");
+            return;
+        }
+
+        if (command == "logbook/get") {
+            int64_t limit = 100;
+            ExtractInt64Value(json, "limit", limit);
+
+            const std::string arr = PWE::Storage::Jobs::QueryJson(static_cast<int>(limit));
+
+            char header[256] = {};
+            std::snprintf(header, sizeof(header),
+                R"({"type":"logbook/list","payload":{"requestId":"%s","items":)",
+                requestId.c_str());
+
+            std::string msg = std::string(header) + arr + "}}";
+            PWE::PostWebViewOverlayMessageJson(msg.c_str());
+            return;
+        }
+
+        if (command == "logbook/truncate") {
+            PWE::Storage::Jobs::Clear();
+            SendCommandResponse(requestId, true, "logbook_cleared");
             return;
         }
 

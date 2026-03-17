@@ -53,6 +53,7 @@
         "refresh": "Refresh status",
         "multiplayer": "Multiplayer",
         "money": "Money",
+        "game": "Game",
         "gear": "Gear",
         "speed": "Speed",
         "language": {
@@ -65,7 +66,21 @@
             "truck": "Truck",
             "job": "Job",
             "transactions": "Transactions",
-            "debug": "Debug"
+            "debug": "Debug",
+            "logbook": "Logbook"
+        },
+        "logbook": {
+            "noJobs": "No jobs found in your logbook.",
+            "notConnected": "Connect to the game to see your logbook.",
+            "income": "Income",
+            "distance": "Distance",
+            "source": "Source",
+            "destination": "Destination",
+            "truncate": "Truncate",
+            "truncateConfirmTitle": "Delete records",
+            "truncateConfirmMessage": "Are you sure you want to delete all logbook records? This action cannot be undone.",
+            "truncateConfirmDelete": "Delete all",
+            "truncateConfirmCancel": "Cancel"
         },
         "overview": {
             "title": "Trip",
@@ -73,7 +88,14 @@
             "speedLimit": "Speed limit",
             "cruise": "Cruise control",
             "navDistance": "To destination",
-            "navTime": "ETA"
+            "navTime": "ETA",
+            "job": "Job",
+            "cargo": "Cargo",
+            "from": "From",
+            "to": "To",
+            "remaining": "Remaining",
+            "distanceRemaining": "Distance left",
+            "income": "Income"
         },
         "transactions": {
             "title": "Transaction History",
@@ -116,15 +138,6 @@
             "wheels": "Wheels",
             "trailer": "Trailer"
         },
-        "job": {
-            "title": "Job",
-            "cargo": "Cargo",
-            "from": "From",
-            "to": "To",
-            "remaining": "Remaining",
-            "distanceRemaining": "Distance left",
-            "income": "Income"
-        },
         "debug": {
             "title": "Debug",
             "bridge": "Plugin bridge",
@@ -137,7 +150,8 @@
             "off": "OFF",
             "devTools": "Developer tools",
             "addMoney": "Add money",
-            "removeMoney": "Remove money"
+            "removeMoney": "Remove money",
+            "money": "Money"
         }
     },
     "widgets": {
@@ -173,8 +187,7 @@
             "player_tollgate_paid": "Tollgate paid",
             "player_ferry_paid": "Ferry transport",
             "player_train_paid": "Train transport",
-            "bank": "Bank",
-            "xp": "XP"
+            "bank": "Bank"
         },
         "fuel": {
             "name": "Fuel",

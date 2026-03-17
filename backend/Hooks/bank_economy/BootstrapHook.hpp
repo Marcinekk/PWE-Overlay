@@ -1,6 +1,6 @@
 #pragma once
 
-namespace PWE::Hooks {
-    void RegisterEconomyBootstrapHook();
-    void UnregisterEconomyBootstrapHook();
+namespace PWE::Hooks::Economy::Internal {
+    void Register();
+    void Unregister();
 }
